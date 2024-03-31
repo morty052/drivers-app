@@ -3,6 +3,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   DriverDetails,
+  DriverImageVerification,
   Home,
   LocationPermissionScreen,
   LoginScreen,
@@ -22,6 +23,7 @@ type RootStackParamList = {
   DriverDetails: {
     email: string;
   };
+  ImageVerification: undefined;
   LocationPermission: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -35,6 +37,10 @@ const AppStack = ({ ONBOARDED }: { ONBOARDED?: boolean }) => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="DriverDetails" component={DriverDetails} />
+      <Stack.Screen
+        name="ImageVerification"
+        component={DriverImageVerification}
+      />
       <Stack.Screen
         name="LocationPermission"
         component={LocationPermissionScreen}

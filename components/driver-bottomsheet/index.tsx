@@ -4,6 +4,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import Colors from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 
 type Props = {
   online: boolean;
@@ -11,9 +12,18 @@ type Props = {
 };
 
 function OfflineSheetView() {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
-      <Ionicons name="options-outline" size={20} color={"white"} />
+      <Ionicons
+        onPress={() => {
+          // @ts-ignore
+          navigation.navigate("ImageVerification");
+        }}
+        name="options-outline"
+        size={20}
+        color={"white"}
+      />
       <Text style={styles.onlineText}>You're Offline</Text>
       <Ionicons name="menu" size={20} color={"white"} />
     </View>

@@ -11,7 +11,7 @@ import { MenuButton } from "../components/menu-button";
 import { EarningsIndicator } from "../components/earnings-indicator";
 import Colors from "../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
-import { SEMI_BOLD } from "../constants/fontNames";
+import { MEDIUM, SEMI_BOLD } from "../constants/fontNames";
 import { View, Text, Image } from "react-native";
 
 type HomeStackParamList = {
@@ -20,6 +20,7 @@ type HomeStackParamList = {
   Profile: undefined;
   Inbox: undefined;
   Account: undefined;
+  ReferFriends: undefined;
 };
 
 const Drawer = createDrawerNavigator<HomeStackParamList>();
@@ -45,7 +46,7 @@ function CustomDrawerContent(props: any) {
           }}
           source={{ uri: "https://picsum.photos/200" }}
         />
-        <Text style={{ color: "white" }}>Home</Text>
+        <Text style={{ color: "white", fontFamily: SEMI_BOLD }}>Jayholms</Text>
       </View>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
@@ -77,11 +78,12 @@ export function HomeStack() {
             backgroundColor: "transparent",
           },
           drawerLabelStyle: {
-            color: "white",
             fontSize: 25,
-            fontFamily: SEMI_BOLD,
+            fontFamily: MEDIUM,
             letterSpacing: 1,
           },
+          drawerActiveTintColor: Colors.primary,
+          drawerInactiveTintColor: "white",
         }}
       >
         <Drawer.Screen
@@ -119,6 +121,13 @@ export function HomeStack() {
             drawerLabel: "Account",
           }}
           name="Account"
+          component={Home}
+        />
+        <Drawer.Screen
+          options={{
+            drawerLabel: "Refer Friends",
+          }}
+          name="ReferFriends"
           component={Home}
         />
       </Drawer.Navigator>
