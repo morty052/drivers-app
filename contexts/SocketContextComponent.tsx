@@ -22,8 +22,8 @@ const SocketContextComponent: React.FunctionComponent<
   const { children } = props;
 
   const socket = useSocket(
-    // `https://norse-habitat-416400.nn.r.appspot.com/user`,
-    `https://088a-102-216-10-2.ngrok-free.app/driver`,
+    `https://norse-habitat-416400.nn.r.appspot.com/driver`,
+    // `https://088a-102-216-10-2.ngrok-free.app/driver`,
     {
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -80,8 +80,7 @@ const SocketContextComponent: React.FunctionComponent<
   const SendHandshake = async () => {
     console.info("Sending handshake");
 
-    // const _id = getItem("affiliate_id");
-    const _id = "8";
+    const _id = getItem("_id");
     socket.emit("handshake", { _id }, () => {
       console.info("User handshake callback message received");
       // SocketDispatch({ type: "update_users", payload: users });

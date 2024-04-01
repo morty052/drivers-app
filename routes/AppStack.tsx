@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   DriverDetails,
   DriverImageVerification,
+  DriverPhone,
   Home,
   LocationPermissionScreen,
   LoginScreen,
@@ -21,9 +22,8 @@ type RootStackParamList = {
   HomeStack: undefined;
   Login: undefined;
   Register: undefined;
-  DriverDetails: {
-    email: string;
-  };
+  DriverDetails: undefined;
+  DriverPhone: undefined;
   ImageVerification: undefined;
   DriverAvatar: undefined;
   LocationPermission: undefined;
@@ -39,6 +39,7 @@ const AppStack = ({ ONBOARDED }: { ONBOARDED?: boolean }) => {
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="DriverDetails" component={DriverDetails} />
+      <Stack.Screen name="DriverPhone" component={DriverPhone} />
       <Stack.Screen
         name="ImageVerification"
         component={DriverImageVerification}

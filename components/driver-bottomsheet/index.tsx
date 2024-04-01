@@ -10,6 +10,7 @@ import { removeItem } from "../../utils/storage";
 type Props = {
   online: boolean;
   setOnline: React.Dispatch<React.SetStateAction<boolean>>;
+  orders: any;
 };
 
 function OfflineSheetView() {
@@ -27,7 +28,10 @@ function OfflineSheetView() {
       />
       <Text style={styles.onlineText}>You're Offline</Text>
       <Ionicons
-        onPress={() => removeItem("ONBOARDED")}
+        onPress={() => {
+          removeItem("VERIFIED");
+          removeItem("ONBOARDED");
+        }}
         name="menu"
         size={20}
         color={"white"}
@@ -38,8 +42,10 @@ function OfflineSheetView() {
 
 function OnlineView({
   setOnline,
+  orders,
 }: {
   setOnline: React.Dispatch<React.SetStateAction<boolean>>;
+  orders: any;
 }) {
   return (
     <View>
@@ -49,11 +55,18 @@ function OnlineView({
       <Text style={{ color: "white", textAlign: "center" }}>
         Available orders nearby: 3
       </Text>
+      {orders?.map((order: any) => (
+        <View>
+          <Text style={{ color: "white", textAlign: "center" }}>
+            {order?.title}
+          </Text>
+        </View>
+      ))}
     </View>
   );
 }
 
-export const DriverBottomSheet = ({ online, setOnline }: Props) => {
+export const DriverBottomSheet = ({ online, setOnline, orders }: Props) => {
   const snapPoints = React.useMemo(
     () => (online ? ["30%", "50%", "70%"] : ["15%"]),
     [online]
@@ -70,7 +83,7 @@ export const DriverBottomSheet = ({ online, setOnline }: Props) => {
       snapPoints={snapPoints}
     >
       {!online && <OfflineSheetView />}
-      {online && <OnlineView setOnline={setOnline} />}
+      {online && <OnlineView orders={orders} setOnline={setOnline} />}
     </BottomSheet>
   );
 };

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { baseUrl } from "../constants/baseUrl";
-import { getItem } from "../utils/storage";
+import { getItem, setItem } from "../utils/storage";
 
 type OnboardingStoreProps = {
   _type: "drivers";
@@ -179,6 +179,12 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         body: JSON.stringify(newDriver),
       });
       const data = await res.json();
+      const { status, _id } = data;
+      setItem("_id", `${_id}`);
+      setItem("email", `${email}`);
+      setItem("firstname", `${firstname}`);
+      setItem("lastname", `${lastname}`);
+      setItem("phone", `${phone}`);
       return data;
     },
   })

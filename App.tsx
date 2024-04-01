@@ -10,6 +10,7 @@ import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import { Platform, View, Text } from "react-native";
 import Constants from "expo-constants";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -69,6 +70,8 @@ export default function App() {
   const responseListener = React.useRef<Notifications.Subscription>();
   SplashScreen.preventAutoHideAsync();
 
+  const client = React.useMemo(() => new QueryClient(), []);
+
   React.useEffect(() => {
     registerForPushNotificationsAsync().then((token) =>
       setExpoPushToken(token)
@@ -113,11 +116,13 @@ export default function App() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <NavigationContainer>
-        <AppStack ONBOARDED={ONBOARDED} />
-      </NavigationContainer>
-      <StatusBar style="dark" />
-    </GestureHandlerRootView>
+    <QueryClientProvider client={client}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <NavigationContainer>
+          <AppStack ONBOARDED={ONBOARDED} />
+        </NavigationContainer>
+        <StatusBar style="dark" />
+      </GestureHandlerRootView>
+    </QueryClientProvider>
   );
 }

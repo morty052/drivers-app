@@ -71,10 +71,10 @@ const DriverAvatarScreen = ({ navigation }: any) => {
 
   // TODO: ADD ERROR HANDLING
   async function handleNext() {
-    // await uploadAvatar();
-    // const data = await createDriver();
-    // setItem("ONBOARDED", "TRUE");
-    // console.info(data);
+    await uploadAvatar();
+    const data = await createDriver();
+    setItem("ONBOARDED", "TRUE");
+    console.info(data);
     navigation.navigate("LocationPermission");
   }
 

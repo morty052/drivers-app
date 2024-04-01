@@ -46,46 +46,57 @@ const NextButton = ({ handlePress }: { handlePress: () => void }) => {
   );
 };
 
-export const DriverDetails = ({ navigation, route }: any) => {
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
+export const DriverPhone = ({ navigation, route }: any) => {
+  const [phoneNumber, setPhoneNumber] = React.useState("");
 
-  const { email } = route.params;
+  const { setPhone } = useOnboardingStore();
 
-  const { setDriverNames } = useOnboardingStore();
+  function handlePhoneNumberChange(number: string) {
+    setPhoneNumber(number);
+  }
 
   function handlePress() {
-    if (!firstName || !lastName) {
+    if (!phoneNumber) {
       return;
     }
-    setDriverNames(firstName, lastName);
-    navigation.navigate("DriverPhone");
+
+    const number = `${"+1"}${phoneNumber}`;
+    setPhone(number);
+    navigation.navigate("ImageVerification");
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.container}>
         <View style={styles.innerContainer}>
-          <Text style={styles.mainText}>What's your name?</Text>
+          <Text style={styles.mainText}>Enter your mobile number</Text>
           <Text style={styles.subtitle}>
-            Let us know how we can address you.
+            We need this information to verify your identity.
           </Text>
           <View style={styles.inputsContainer}>
-            <TextInput
-              autoFocus
-              value={firstName}
-              onChangeText={(text) => setFirstName(text)}
-              placeholderTextColor={Colors.dark}
-              placeholder="First Name"
-              style={styles.input}
-            />
-            <TextInput
-              value={lastName}
-              onChangeText={(text) => setLastName(text)}
-              placeholderTextColor={Colors.dark}
-              placeholder="Last Name"
-              style={styles.input}
-            />
+            <View
+              style={{
+                width: 65,
+                backgroundColor: Colors.gray,
+                borderRadius: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ fontSize: 30 }}>🇨🇦</Text>
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={{ fontSize: 20 }}>+1</Text>
+              <TextInput
+                autoFocus
+                keyboardType="phone-pad"
+                value={phoneNumber}
+                onChangeText={(text) => handlePhoneNumberChange(text)}
+                placeholderTextColor={Colors.dark}
+                placeholder=""
+                style={styles.input}
+              />
+            </View>
           </View>
         </View>
         <SafeAreaView>
@@ -114,7 +125,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   innerContainer: {
-    padding: 10,
+    paddingTop: 10,
   },
   mainText: {
     fontFamily: SEMI_BOLD,
@@ -122,16 +133,27 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   subtitle: {
-    marginTop: 10,
+    marginTop: 5,
     fontSize: 16,
   },
   inputsContainer: {
-    gap: 20,
+    gap: 10,
+    flexDirection: "row",
     paddingTop: 28,
   },
-  input: {
+  inputContainer: {
     backgroundColor: Colors.gray,
     padding: 20,
     borderRadius: 10,
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    // backgroundColor: Colors.gray,
+    // padding: 20,
+    // borderRadius: 10,
+    fontSize: 20,
+    flex: 1,
   },
 });

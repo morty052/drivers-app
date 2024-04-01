@@ -6,3 +6,6 @@ export * from "./driver-avatar-screen";
 export * from "./location-permission-screen";
 export * from "./verification-pending-screen";
 export * from "./home";
+export * from "./driver-phone";
+export * from "./profile";
+export * from "./earnings-screen";

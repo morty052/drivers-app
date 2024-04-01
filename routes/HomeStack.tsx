@@ -1,5 +1,10 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Home } from "../screens";
+import {
+  EarningsScreen,
+  Home,
+  Profile,
+  VerificationPendingScreen,
+} from "../screens";
 import {
   createDrawerNavigator,
   DrawerContentScrollView,
@@ -13,14 +18,17 @@ import Colors from "../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { MEDIUM, SEMI_BOLD } from "../constants/fontNames";
 import { View, Text, Image } from "react-native";
+import { getItem } from "../utils/storage";
+import React from "react";
 
 type HomeStackParamList = {
   Home: undefined;
   Earnings: undefined;
   Profile: undefined;
   Inbox: undefined;
-  Account: undefined;
+  Settings: undefined;
   ReferFriends: undefined;
+  Pending: undefined;
 };
 
 const Drawer = createDrawerNavigator<HomeStackParamList>();
@@ -63,9 +71,11 @@ const options = {
 };
 
 export function HomeStack() {
+  const verified = getItem("VERIFIED");
   return (
     <SocketContextComponent>
       <Drawer.Navigator
+        initialRouteName={verified ? "Home" : "Pending"}
         drawerContent={(props) => <CustomDrawerContent {...props} />}
         screenOptions={{
           headerLeft: () => <MenuButton />,
@@ -100,14 +110,15 @@ export function HomeStack() {
             drawerLabel: "Earnings",
           }}
           name={"Earnings"}
-          component={Home}
+          component={EarningsScreen}
         />
         <Drawer.Screen
           options={{
             drawerLabel: "Profile",
+            headerTransparent: true,
           }}
           name="Profile"
-          component={Home}
+          component={Profile}
         />
         <Drawer.Screen
           options={{
@@ -118,9 +129,9 @@ export function HomeStack() {
         />
         <Drawer.Screen
           options={{
-            drawerLabel: "Account",
+            drawerLabel: "Settings",
           }}
-          name="Account"
+          name="Settings"
           component={Home}
         />
         <Drawer.Screen
@@ -129,6 +140,17 @@ export function HomeStack() {
           }}
           name="ReferFriends"
           component={Home}
+        />
+        <Drawer.Screen
+          options={{
+            drawerLabel: "",
+            headerShown: false,
+            drawerItemStyle: {
+              display: "none",
+            },
+          }}
+          name="Pending"
+          component={VerificationPendingScreen}
         />
       </Drawer.Navigator>
     </SocketContextComponent>

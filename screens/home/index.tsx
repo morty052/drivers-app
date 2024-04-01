@@ -1,23 +1,40 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
-import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/colors";
 import { DriverBottomSheet } from "../../components/driver-bottomsheet";
 import { MEDIUM, SEMI_BOLD } from "../../constants/fontNames";
-import MapViewDirections from "react-native-maps-directions";
-import { getItem } from "../../utils/storage";
-import { MapStyle } from "../../constants/mapStyle";
+import MapViewDirections, {
+  MapViewDirectionsDestination,
+} from "react-native-maps-directions";
 import { useSocketContext } from "../../contexts/SocketContext";
 import { Sidebar } from "../../components/sidebar";
 import { StatusBar } from "expo-status-bar";
-import { VerificationPendingScreen } from "../verification-pending-screen";
+// import * as BackgroundFetch from "expo-background-fetch";
+// import * as Location from "expo-location";
 
 type Props = {};
 
 type NewdeliveryProps = {
-  price: number;
+  total: number;
+  vendor: {
+    name: string;
+    image: string;
+    address: {
+      street: string;
+      city: string;
+      province: string;
+      postal_code: string;
+    };
+    location: {
+      lat: number;
+      lng: number;
+    };
+    user: {
+      firstname: string;
+    };
+  };
 };
 
 const GoOnlineButton = ({ handleOnline }: { handleOnline: () => void }) => {
@@ -62,9 +79,15 @@ const GoOnlineButton = ({ handleOnline }: { handleOnline: () => void }) => {
 
 const NewDeliveryPopup = ({
   newDelivery,
+  setNewDelivery,
+  acceptOrder,
 }: {
   newDelivery: NewdeliveryProps | null;
+  setNewDelivery: React.Dispatch<React.SetStateAction<NewdeliveryProps | null>>;
+  acceptOrder: () => void;
 }) => {
+  const { total, vendor } = newDelivery ?? {};
+  const address = `${vendor?.address.street}, ${vendor?.address.city}, ${vendor?.address.province} ${vendor?.address.postal_code}`;
   return (
     <View
       style={{
@@ -80,21 +103,42 @@ const NewDeliveryPopup = ({
         paddingHorizontal: 20,
       }}
     >
+      {/* HEADER */}
       <View
         style={{
-          alignSelf: "center",
-          width: 150,
-          backgroundColor: Colors.primary,
-          borderRadius: 20,
-          height: 40,
+          flexDirection: "row",
+          justifyContent: "space-between",
           alignItems: "center",
-          justifyContent: "center",
         }}
       >
-        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-          <Ionicons color={"white"} name="fast-food-outline" size={25} />
-          <Text style={{ color: "white", fontFamily: MEDIUM }}>Delivery</Text>
+        <Ionicons
+          onPress={() => setNewDelivery(null)}
+          color={Colors.danger}
+          name="close-circle-outline"
+          size={30}
+        />
+        <View
+          style={{
+            alignSelf: "center",
+            width: 150,
+            backgroundColor: Colors.primary,
+            borderRadius: 20,
+            height: 40,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+            <Ionicons color={"white"} name="fast-food-outline" size={25} />
+            <Text style={{ color: "white", fontFamily: MEDIUM }}>Delivery</Text>
+          </View>
         </View>
+        <Ionicons
+          onPress={() => acceptOrder()}
+          color={Colors.primary}
+          name="checkmark-circle-outline"
+          size={30}
+        />
       </View>
       {/* AMOUNT */}
       <Text
@@ -106,7 +150,7 @@ const NewDeliveryPopup = ({
           marginTop: 10,
         }}
       >
-        ${newDelivery?.price}
+        ${total}
       </Text>
       <View style={{ marginTop: 10, gap: 20, flex: 1 }}>
         <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
@@ -125,9 +169,9 @@ const NewDeliveryPopup = ({
               paddingRight: 30,
             }}
           >
-            <Ionicons name="location-outline" size={25} color="white" />
+            <Ionicons name="storefront-outline" size={25} color="white" />
             <Text style={{ color: "white", fontFamily: MEDIUM }}>
-              Nottingham - Cross Street Retail Park , ON, mn
+              {address}
             </Text>
           </View>
           <View
@@ -154,39 +198,71 @@ export const Home = (props: Props) => {
   const [newDelivery, setnewDelivery] = React.useState<null | NewdeliveryProps>(
     null
   );
-
-  const { socket } = useSocketContext();
-
-  const verified = getItem("VERIFIED");
-
-  React.useEffect(() => {
-    if (!verified) {
-      return;
-    }
-    socket?.on("lol", () => {
-      console.info("driver connected message received");
-    });
-    socket?.on("NEW_DELIVERY", (data) => {
-      console.info("New Order Received");
-      setnewDelivery(data);
-    });
-  }, [socket]);
+  const [newDeliveryLocation, setnewDeliveryLocation] = React.useState<
+    undefined | MapViewDirectionsDestination
+  >();
+  const [orders, setOrders] = React.useState(null);
 
   const origin = { latitude: 43.9395387, longitude: -78.71435 };
   const destination = { latitude: 43.9395387, longitude: -78.81455 };
   const GOOGLE_MAPS_DIRECTIONS_APIKEY =
     "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
 
+  function acceptOrder() {
+    console.info(newDeliveryLocation);
+  }
+
+  function rejectOrder() {
+    console.info("accerpted");
+  }
+
   async function handleOnline() {
-    const res = await fetch("https://088a-102-216-10-2.ngrok-free.app");
-    const data = await res.json();
-    console.log(data);
+    // const res = await fetch("https://norse-habitat-416400.nn.r.appspot.com");
+    // const data = await res.json();
+    // console.log(data);
     setOnline(true);
   }
 
-  if (!verified) {
-    return <VerificationPendingScreen />;
-  }
+  const { socket } = useSocketContext();
+
+  React.useEffect(() => {
+    socket?.on("lol", () => {
+      console.info("driver connected message received");
+    });
+    socket?.on("NEW_DELIVERY", (data: { order: NewdeliveryProps[] }) => {
+      setnewDelivery(data.order[0]);
+      const vendor = data.order[0].vendor;
+      setnewDeliveryLocation({
+        latitude: Number(vendor.location.lat),
+        longitude: Number(vendor.location.lng),
+      });
+      // setnewDeliveryLocation({ latitude: 43.9395387, longitude: -78.71435 });
+    });
+  }, [socket]);
+
+  // React.useEffect(() => {
+  //   const f = async () => {
+  //     let { status } = await Location.requestForegroundPermissionsAsync();
+  //     if (status !== "granted") {
+  //       console.log("Permission to access location was denied");
+  //       return;
+  //     }
+
+  //     await Location.startLocationUpdatesAsync("backgroundTask", {
+  //       accuracy: Location.Accuracy.BestForNavigation,
+  //       timeInterval: 300000,
+  //       showsBackgroundLocationIndicator: true,
+  //     });
+
+  //     BackgroundFetch.registerTaskAsync("backgroundTask", {
+  //       minimumInterval: 300,
+  //       stopOnTerminate: false,
+  //     });
+
+  //     BackgroundFetch.setMinimumIntervalAsync(300);
+  //   };
+  //   f();
+  // }, []);
 
   return (
     <>
@@ -209,12 +285,20 @@ export const Home = (props: Props) => {
             newDelivery && { height: "100%" },
           ]}
         >
-          <Marker coordinate={{ latitude: 43.9395387, longitude: -78.71435 }} />
-          <Marker coordinate={destination} />
-          {newDelivery && (
+          <Marker
+            image={require("../../assets/location_marker.png")}
+            coordinate={{ latitude: 43.9395387, longitude: -78.71435 }}
+          />
+          {newDeliveryLocation && (
+            <Marker
+              image={require("../../assets/store_marker.png")}
+              coordinate={newDeliveryLocation as LatLng}
+            />
+          )}
+          {newDeliveryLocation && (
             <MapViewDirections
               origin={origin}
-              destination={destination}
+              destination={newDeliveryLocation}
               apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
               strokeWidth={8}
               strokeColor={Colors.primary}
@@ -225,9 +309,19 @@ export const Home = (props: Props) => {
           <GoOnlineButton handleOnline={handleOnline} />
         )}
         {!newDelivery && (
-          <DriverBottomSheet setOnline={setOnline} online={online} />
+          <DriverBottomSheet
+            orders={orders}
+            setOnline={setOnline}
+            online={online}
+          />
         )}
-        {newDelivery && <NewDeliveryPopup newDelivery={newDelivery} />}
+        {newDelivery && (
+          <NewDeliveryPopup
+            acceptOrder={acceptOrder}
+            setNewDelivery={setnewDelivery}
+            newDelivery={newDelivery}
+          />
+        )}
       </View>
       <StatusBar style="dark" />
     </>
