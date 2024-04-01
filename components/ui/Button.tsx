@@ -35,7 +35,13 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 10,
   },
-  primary_text: {},
+  dark: {
+    backgroundColor: Colors.darkGrey,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 50,
+    borderRadius: 10,
+  },
 });
 
 const textStyles = StyleSheet.create({
@@ -44,5 +50,9 @@ const textStyles = StyleSheet.create({
     fontSize: 20,
     fontFamily: SEMI_BOLD,
   },
-  primary_text: {},
+  dark: {
+    color: "white",
+    fontSize: 20,
+    fontFamily: SEMI_BOLD,
+  },
 });

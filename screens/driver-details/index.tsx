@@ -5,6 +5,7 @@ import { SEMI_BOLD } from "../../constants/fontNames";
 import Colors from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useOnboardingStore } from "../../models/onBoardingStore";
 
 type Props = {};
 
@@ -51,12 +52,14 @@ export const DriverDetails = ({ navigation, route }: any) => {
 
   const { email } = route.params;
 
+  const { setDriverNames } = useOnboardingStore();
+
   function handlePress() {
     if (!firstName || !lastName) {
       return;
     }
-
-    navigation.navigate("LocationPermission", {
+    setDriverNames(firstName, lastName);
+    navigation.navigate("ImageVerification", {
       firstName,
       lastName,
       email,

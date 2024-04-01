@@ -25,6 +25,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.dietdining.driversapp",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyBdE4cgtG-GaHplPTFGDHt1iuegK2rfr7E"

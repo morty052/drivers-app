@@ -24,6 +24,7 @@
     "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native": "^6.1.10",
     "@react-navigation/native-stack": "^6.9.18",
+    "@sanity/client": "^6.15.7",
     "expo": "~50.0.14",
     "expo-constants": "~15.4.5",
     "expo-dev-client": "~3.3.11",
@@ -45,7 +46,10 @@
     "react-native-screens": "~3.29.0",
     "react-native-vision-camera": "^3.9.2",
     "socket.io-client": "^4.7.4",
-    "zustand": "^4.5.2"
+    "zustand": "^4.5.2",
+    "expo-av": "~13.10.5",
+    "expo-background-fetch": "~11.8.1",
+    "expo-task-manager": "~11.7.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

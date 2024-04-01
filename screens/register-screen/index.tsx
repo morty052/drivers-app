@@ -3,15 +3,19 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/colors";
 import { SEMI_BOLD } from "../../constants/fontNames";
+import { useOnboardingStore } from "../../models/onBoardingStore";
 
 export const RegisterScreen = ({ navigation }: any) => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
 
+  const { setLoginDetails } = useOnboardingStore();
+
   async function handleRegister() {
-    if (!email) {
+    if (!email || !password) {
       return;
     }
+    setLoginDetails(email, password);
     navigation.navigate("DriverDetails", { email });
   }
 

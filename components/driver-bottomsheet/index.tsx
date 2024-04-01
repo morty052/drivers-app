@@ -5,6 +5,7 @@ import Colors from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
+import { removeItem } from "../../utils/storage";
 
 type Props = {
   online: boolean;
@@ -25,7 +26,12 @@ function OfflineSheetView() {
         color={"white"}
       />
       <Text style={styles.onlineText}>You're Offline</Text>
-      <Ionicons name="menu" size={20} color={"white"} />
+      <Ionicons
+        onPress={() => removeItem("ONBOARDED")}
+        name="menu"
+        size={20}
+        color={"white"}
+      />
     </View>
   );
 }

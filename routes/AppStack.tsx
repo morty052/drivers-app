@@ -14,6 +14,7 @@ import { MenuButton } from "../components/menu-button";
 import { EarningsIndicator } from "../components/earnings-indicator";
 import { HomeStack } from "./HomeStack";
 import SocketContextComponent from "../contexts/SocketContextComponent";
+import DriverAvatarScreen from "../screens/driver-avatar-screen";
 
 type Props = {};
 type RootStackParamList = {
@@ -24,6 +25,7 @@ type RootStackParamList = {
     email: string;
   };
   ImageVerification: undefined;
+  DriverAvatar: undefined;
   LocationPermission: undefined;
 };
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -40,6 +42,15 @@ const AppStack = ({ ONBOARDED }: { ONBOARDED?: boolean }) => {
       <Stack.Screen
         name="ImageVerification"
         component={DriverImageVerification}
+      />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          headerShadowVisible: false,
+          headerTitle: "",
+        }}
+        name="DriverAvatar"
+        component={DriverAvatarScreen}
       />
       <Stack.Screen
         name="LocationPermission"

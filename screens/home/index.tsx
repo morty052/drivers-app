@@ -12,6 +12,7 @@ import { MapStyle } from "../../constants/mapStyle";
 import { useSocketContext } from "../../contexts/SocketContext";
 import { Sidebar } from "../../components/sidebar";
 import { StatusBar } from "expo-status-bar";
+import { VerificationPendingScreen } from "../verification-pending-screen";
 
 type Props = {};
 
@@ -156,7 +157,12 @@ export const Home = (props: Props) => {
 
   const { socket } = useSocketContext();
 
+  const verified = getItem("VERIFIED");
+
   React.useEffect(() => {
+    if (!verified) {
+      return;
+    }
     socket?.on("lol", () => {
       console.info("driver connected message received");
     });
@@ -177,6 +183,11 @@ export const Home = (props: Props) => {
     console.log(data);
     setOnline(true);
   }
+
+  if (!verified) {
+    return <VerificationPendingScreen />;
+  }
+
   return (
     <>
       <Sidebar />

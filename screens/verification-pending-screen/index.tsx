@@ -3,14 +3,12 @@ import React from "react";
 
 type Props = {};
 
-const SelfieUpload = (props: Props) => {
+export const VerificationPendingScreen = (props: Props) => {
   return (
     <View>
-      <Text>SelfieUpload</Text>
+      <Text>VerificationPendingScreen</Text>
     </View>
   );
 };
-
-export default SelfieUpload;
 
 const styles = StyleSheet.create({});
