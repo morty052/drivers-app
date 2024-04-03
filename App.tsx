@@ -79,6 +79,11 @@ export default function App() {
 
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
+        const { verificationNotification } = notification.request.content.data;
+        if (verificationNotification) {
+          console.log(notification.request.content.data);
+          setItem("VERIFIED", "TRUE");
+        }
         setNotification(notification);
       });
 

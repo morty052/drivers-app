@@ -11,8 +11,31 @@ import MapViewDirections, {
 import { useSocketContext } from "../../contexts/SocketContext";
 import { Sidebar } from "../../components/sidebar";
 import { StatusBar } from "expo-status-bar";
-// import * as BackgroundFetch from "expo-background-fetch";
-// import * as Location from "expo-location";
+import * as BackgroundFetch from "expo-background-fetch";
+import * as TaskManager from "expo-task-manager";
+import { baseUrl } from "../../constants/baseUrl";
+import { getItem } from "../../utils/storage";
+
+const BACKGROUND_FETCH_TASK = "background-fetch";
+
+TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
+  const now = Date.now();
+
+  console.log(
+    `Got background fetch call at date: ${new Date(now).toISOString()}`
+  );
+
+  // Be sure to return the successful result type!
+  return BackgroundFetch.BackgroundFetchResult.NewData;
+});
+
+async function registerBackgroundFetchAsync() {
+  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
+    minimumInterval: 60 * 2, // 2 minutes
+    stopOnTerminate: false, // android only,
+    startOnBoot: true, // android only
+  });
+}
 
 type Props = {};
 
@@ -204,22 +227,36 @@ export const Home = (props: Props) => {
   const [orders, setOrders] = React.useState(null);
 
   const origin = { latitude: 43.9395387, longitude: -78.71435 };
-  const destination = { latitude: 43.9395387, longitude: -78.81455 };
   const GOOGLE_MAPS_DIRECTIONS_APIKEY =
     "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
+
+  const mapRef = React.useRef<MapView>(null);
+
+  const animateToStore = ({ lat, lng }: { lat: number; lng: number }) => {
+    if (mapRef.current) {
+      mapRef.current.fitToCoordinates(
+        [{ latitude: lat, longitude: lng }, origin],
+        {
+          animated: true,
+          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        }
+      );
+    }
+  };
 
   function acceptOrder() {
     console.info(newDeliveryLocation);
   }
 
   function rejectOrder() {
-    console.info("accerpted");
+    console.info("accepted");
   }
 
   async function handleOnline() {
-    // const res = await fetch("https://norse-habitat-416400.nn.r.appspot.com");
-    // const data = await res.json();
-    // console.log(data);
+    const _id = getItem("_id");
+    const res = await fetch(`${baseUrl}/drivers/go-online?_id=${_id}`);
+    const data = await res.json();
+    console.log(data);
     setOnline(true);
   }
 
@@ -236,39 +273,44 @@ export const Home = (props: Props) => {
         latitude: Number(vendor.location.lat),
         longitude: Number(vendor.location.lng),
       });
-      // setnewDeliveryLocation({ latitude: 43.9395387, longitude: -78.71435 });
+      animateToStore({
+        lat: Number(vendor.location.lat),
+        lng: Number(vendor.location.lng),
+      });
     });
   }, [socket]);
 
-  // React.useEffect(() => {
-  //   const f = async () => {
-  //     let { status } = await Location.requestForegroundPermissionsAsync();
-  //     if (status !== "granted") {
-  //       console.log("Permission to access location was denied");
-  //       return;
-  //     }
+  React.useEffect(() => {
+    // const f = async () => {
+    //   let { status } = await Location.requestForegroundPermissionsAsync();
+    //   if (status !== "granted") {
+    //     console.log("Permission to access location was denied");
+    //     return;
+    //   }
 
-  //     await Location.startLocationUpdatesAsync("backgroundTask", {
-  //       accuracy: Location.Accuracy.BestForNavigation,
-  //       timeInterval: 300000,
-  //       showsBackgroundLocationIndicator: true,
-  //     });
+    //   await Location.startLocationUpdatesAsync("backgroundTask", {
+    //     accuracy: Location.Accuracy.BestForNavigation,
+    //     timeInterval: 300000,
+    //     showsBackgroundLocationIndicator: true,
+    //   });
 
-  //     BackgroundFetch.registerTaskAsync("backgroundTask", {
-  //       minimumInterval: 300,
-  //       stopOnTerminate: false,
-  //     });
+    //   BackgroundFetch.registerTaskAsync("backgroundTask", {
+    //     minimumInterval: 300,
+    //     stopOnTerminate: false,
+    //   });
 
-  //     BackgroundFetch.setMinimumIntervalAsync(300);
-  //   };
-  //   f();
-  // }, []);
+    //   BackgroundFetch.setMinimumIntervalAsync(300);
+    // };
+    // f();
+    registerBackgroundFetchAsync();
+  }, []);
 
   return (
     <>
       <Sidebar />
       <View style={styles.container}>
         <MapView
+          ref={mapRef}
           showsBuildings
           // customMapStyle={online ? MapStyle : undefined}
           showsCompass={false}

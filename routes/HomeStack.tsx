@@ -3,6 +3,7 @@ import {
   EarningsScreen,
   Home,
   Profile,
+  SettingsScreen,
   VerificationPendingScreen,
 } from "../screens";
 import {
@@ -132,7 +133,7 @@ export function HomeStack() {
             drawerLabel: "Settings",
           }}
           name="Settings"
-          component={Home}
+          component={SettingsScreen}
         />
         <Drawer.Screen
           options={{

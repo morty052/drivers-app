@@ -27,6 +27,7 @@
     "@sanity/client": "^6.15.7",
     "@shopify/react-native-skia": "^1.0.4",
     "@tanstack/react-query": "^5.20.5",
+    "dayjs": "^1.11.10",
     "expo": "~50.0.14",
     "expo-av": "~13.10.5",
     "expo-background-fetch": "~11.8.1",

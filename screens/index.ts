@@ -9,3 +9,4 @@ export * from "./home";
 export * from "./driver-phone";
 export * from "./profile";
 export * from "./earnings-screen";
+export * from "./settings-screen";
