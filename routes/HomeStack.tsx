@@ -19,7 +19,7 @@ import Colors from "../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
 import { MEDIUM, SEMI_BOLD } from "../constants/fontNames";
 import { View, Text, Image } from "react-native";
-import { getItem } from "../utils/storage";
+import { getItem, removeItem } from "../utils/storage";
 import React from "react";
 
 type HomeStackParamList = {
@@ -37,6 +37,8 @@ const Drawer = createDrawerNavigator<HomeStackParamList>();
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 function CustomDrawerContent(props: any) {
+  const firstname = getItem("firstname");
+  const avatar = getItem("avatar");
   return (
     <DrawerContentScrollView {...props}>
       <View
@@ -48,14 +50,23 @@ function CustomDrawerContent(props: any) {
         }}
       >
         <Image
+          resizeMode="cover"
           style={{
             height: 50,
             width: 50,
             borderRadius: 25,
           }}
-          source={{ uri: "https://picsum.photos/200" }}
+          source={{ uri: avatar }}
         />
-        <Text style={{ color: "white", fontFamily: SEMI_BOLD }}>Jayholms</Text>
+        <Text
+          onPress={() => {
+            removeItem("ONBOARDED");
+            removeItem("VERIFIED");
+          }}
+          style={{ color: "white", fontFamily: SEMI_BOLD }}
+        >
+          {firstname}
+        </Text>
       </View>
       <DrawerItemList {...props} />
     </DrawerContentScrollView>
@@ -99,9 +110,7 @@ export function HomeStack() {
       >
         <Drawer.Screen
           options={{
-            drawerLabel: "Home",
-            headerTitle: () => <EarningsIndicator />,
-            headerTitleAlign: "center",
+            headerLeft: () => null,
           }}
           name="Home"
           component={Home}

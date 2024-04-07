@@ -1,6 +1,11 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
-import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Pressable, StyleSheet, Text, View, Image } from "react-native";
+import React, { useMemo } from "react";
+import MapView, {
+  Callout,
+  LatLng,
+  Marker,
+  PROVIDER_GOOGLE,
+} from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/colors";
 import { DriverBottomSheet } from "../../components/driver-bottomsheet";
@@ -9,36 +14,19 @@ import MapViewDirections, {
   MapViewDirectionsDestination,
 } from "react-native-maps-directions";
 import { useSocketContext } from "../../contexts/SocketContext";
-import { Sidebar } from "../../components/sidebar";
 import { StatusBar } from "expo-status-bar";
-import * as BackgroundFetch from "expo-background-fetch";
-import * as TaskManager from "expo-task-manager";
 import { baseUrl } from "../../constants/baseUrl";
-import { getItem } from "../../utils/storage";
-
-const BACKGROUND_FETCH_TASK = "background-fetch";
-
-TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-  const now = Date.now();
-
-  console.log(
-    `Got background fetch call at date: ${new Date(now).toISOString()}`
-  );
-
-  // Be sure to return the successful result type!
-  return BackgroundFetch.BackgroundFetchResult.NewData;
-});
-
-async function registerBackgroundFetchAsync() {
-  return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-    minimumInterval: 60 * 2, // 2 minutes
-    stopOnTerminate: false, // android only,
-    startOnBoot: true, // android only
-  });
-}
+import { getItem, setItem } from "../../utils/storage";
+import usePlaySound from "../../hooks/useSound";
+import { useDriverLocation } from "../../hooks/useDriverLocation";
+import { useDriverStore } from "../../models/driverStore";
+import HomeLoadingScreen from "./components/HomeLoadingScreen";
+import { EarningsIndicator } from "../../components/earnings-indicator";
+import { MenuButton } from "../../components/menu-button";
 
 type Props = {};
 
+const GOOGLE_MAPS_DIRECTIONS_APIKEY = "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
 type NewdeliveryProps = {
   total: number;
   vendor: {
@@ -50,17 +38,29 @@ type NewdeliveryProps = {
       province: string;
       postal_code: string;
     };
-    location: {
-      lat: number;
-      lng: number;
-    };
     user: {
       firstname: string;
     };
   };
+  vendor_location: {
+    lat: number;
+    lng: number;
+  };
 };
 
-const GoOnlineButton = ({ handleOnline }: { handleOnline: () => void }) => {
+const InteractionButtons = ({
+  handleOnline,
+  focusDriver,
+  online,
+}: {
+  handleOnline: () => void;
+  focusDriver: () => void;
+  online: boolean;
+}) => {
+  if (online) {
+    return null;
+  }
+
   return (
     <View
       style={{
@@ -68,12 +68,38 @@ const GoOnlineButton = ({ handleOnline }: { handleOnline: () => void }) => {
         // backgroundColor: "red",
         left: 0,
         right: 0,
-        bottom: "16%",
+        bottom: "12%",
         zIndex: 1,
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        flexDirection: "row",
+        paddingHorizontal: 20,
       }}
     >
+      <Pressable
+        style={{
+          height: 40,
+          width: 40,
+          borderRadius: 20,
+          backgroundColor: "white",
+          alignItems: "center",
+          justifyContent: "center",
+          elevation: 10,
+          shadowColor: "black",
+          shadowOffset: {
+            width: 0,
+            height: 10,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.5,
+        }}
+        // onPress={() => {
+        //   setItem("latitude", "43.9395387");
+        //   setItem("longitude", "-78.81455");
+        // }}
+      >
+        <Ionicons name="storefront-outline" size={25} color="black" />
+      </Pressable>
       <Pressable
         onPress={() => handleOnline()}
         style={{
@@ -96,6 +122,27 @@ const GoOnlineButton = ({ handleOnline }: { handleOnline: () => void }) => {
           Go
         </Text>
       </Pressable>
+      <Pressable
+        style={{
+          height: 40,
+          width: 40,
+          borderRadius: 20,
+          backgroundColor: "white",
+          alignItems: "center",
+          justifyContent: "center",
+          elevation: 10,
+          shadowColor: "black",
+          shadowOffset: {
+            width: 0,
+            height: 10,
+          },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.5,
+        }}
+        onPress={focusDriver}
+      >
+        <Ionicons name="location-outline" size={30} color="black" />
+      </Pressable>
     </View>
   );
 };
@@ -110,7 +157,14 @@ const NewDeliveryPopup = ({
   acceptOrder: () => void;
 }) => {
   const { total, vendor } = newDelivery ?? {};
-  const address = `${vendor?.address.street}, ${vendor?.address.city}, ${vendor?.address.province} ${vendor?.address.postal_code}`;
+  const address = React.useMemo(() => {
+    return `${vendor?.address.street}, ${vendor?.address.city}, ${vendor?.address.province}, ${vendor?.address.postal_code}`;
+  }, [newDelivery]);
+
+  if (!newDelivery) {
+    return null;
+  }
+
   return (
     <View
       style={{
@@ -175,6 +229,7 @@ const NewDeliveryPopup = ({
       >
         ${total}
       </Text>
+      {/* DIRECTIONS */}
       <View style={{ marginTop: 10, gap: 20, flex: 1 }}>
         <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
           <Ionicons name="time-outline" size={25} color="white" />
@@ -199,6 +254,15 @@ const NewDeliveryPopup = ({
           </View>
           <View
             style={{
+              width: 1,
+              height: "30%",
+              backgroundColor: "white",
+              marginLeft: 10,
+              // transform: [{ rotate: "90deg" }],
+            }}
+          ></View>
+          <View
+            style={{
               flexDirection: "row",
               gap: 10,
               alignItems: "center",
@@ -216,8 +280,30 @@ const NewDeliveryPopup = ({
   );
 };
 
-export const Home = (props: Props) => {
-  const [online, setOnline] = React.useState(false);
+async function fetchNearbyOrders() {
+  try {
+    const latitude = getItem("latitude");
+    const longitude = getItem("longitude");
+    const res = await fetch(
+      `${baseUrl}/drivers/nearby-orders?lat=${latitude}&lng=${longitude}`
+    );
+    const data = await res.json();
+    const { status, orders } = data;
+    if (status.error) {
+      throw "something went wrong";
+    }
+    return orders;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export const Home = ({ navigation }: any) => {
+  // const [online, setOnline] = React.useState(false);
+  const [goingOnline, setGoingOnline] = React.useState(true);
+  const [delivering, setDelivering] = React.useState<null | NewdeliveryProps>(
+    null
+  );
   const [newDelivery, setnewDelivery] = React.useState<null | NewdeliveryProps>(
     null
   );
@@ -226,16 +312,18 @@ export const Home = (props: Props) => {
   >();
   const [orders, setOrders] = React.useState(null);
 
-  const origin = { latitude: 43.9395387, longitude: -78.71435 };
-  const GOOGLE_MAPS_DIRECTIONS_APIKEY =
-    "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
-
   const mapRef = React.useRef<MapView>(null);
+
+  const playSound = usePlaySound();
+
+  const { online, setOnline } = useDriverStore();
+
+  const { location: origin, loadingLocation } = useDriverLocation();
 
   const animateToStore = ({ lat, lng }: { lat: number; lng: number }) => {
     if (mapRef.current) {
       mapRef.current.fitToCoordinates(
-        [{ latitude: lat, longitude: lng }, origin],
+        [{ latitude: lat, longitude: lng }, origin as LatLng],
         {
           animated: true,
           edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
@@ -244,8 +332,18 @@ export const Home = (props: Props) => {
     }
   };
 
+  const focusDriver = () => {
+    mapRef.current?.animateToRegion({
+      ...(origin as LatLng),
+      latitudeDelta: 0.01,
+      longitudeDelta: 0.01,
+    });
+  };
+
   function acceptOrder() {
-    console.info(newDeliveryLocation);
+    setnewDelivery(null);
+    setDelivering(newDelivery);
+    navigation.navigate("OrderScreen", { order: newDelivery });
   }
 
   function rejectOrder() {
@@ -253,11 +351,18 @@ export const Home = (props: Props) => {
   }
 
   async function handleOnline() {
-    const _id = getItem("_id");
-    const res = await fetch(`${baseUrl}/drivers/go-online?_id=${_id}`);
-    const data = await res.json();
-    console.log(data);
-    setOnline(true);
+    try {
+      const _id = getItem("_id");
+      const res = await fetch(`${baseUrl}/drivers/go-online?_id=${_id}`);
+      const data = await res.json();
+      const orders = await fetchNearbyOrders();
+      setOrders(orders);
+      setOnline(true);
+      console.log("orders", orders);
+      setItem("ONLINE", "true");
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   const { socket } = useSocketContext();
@@ -266,80 +371,70 @@ export const Home = (props: Props) => {
     socket?.on("lol", () => {
       console.info("driver connected message received");
     });
-    socket?.on("NEW_DELIVERY", (data: { order: NewdeliveryProps[] }) => {
+    socket?.on("NEW_DELIVERY", async (data: { order: NewdeliveryProps[] }) => {
       setnewDelivery(data.order[0]);
-      const vendor = data.order[0].vendor;
+      const vendor_location = data.order[0].vendor_location;
+      console.log(data.order[0]);
       setnewDeliveryLocation({
-        latitude: Number(vendor.location.lat),
-        longitude: Number(vendor.location.lng),
+        latitude: Number(vendor_location.lat),
+        longitude: Number(vendor_location.lng),
       });
       animateToStore({
-        lat: Number(vendor.location.lat),
-        lng: Number(vendor.location.lng),
+        lat: Number(vendor_location.lat),
+        lng: Number(vendor_location.lng),
       });
+      await playSound();
     });
   }, [socket]);
 
-  React.useEffect(() => {
-    // const f = async () => {
-    //   let { status } = await Location.requestForegroundPermissionsAsync();
-    //   if (status !== "granted") {
-    //     console.log("Permission to access location was denied");
-    //     return;
-    //   }
+  React.useLayoutEffect(() => {
+    if (!origin) {
+      return;
+    }
 
-    //   await Location.startLocationUpdatesAsync("backgroundTask", {
-    //     accuracy: Location.Accuracy.BestForNavigation,
-    //     timeInterval: 300000,
-    //     showsBackgroundLocationIndicator: true,
-    //   });
+    navigation.setOptions({
+      drawerLabel: "Home",
+      headerTitle: () => <EarningsIndicator />,
+      headerTitleAlign: "center",
+      headerLeft: () => <MenuButton />,
+    });
+  }, [origin]);
 
-    //   BackgroundFetch.registerTaskAsync("backgroundTask", {
-    //     minimumInterval: 300,
-    //     stopOnTerminate: false,
-    //   });
-
-    //   BackgroundFetch.setMinimumIntervalAsync(300);
-    // };
-    // f();
-    registerBackgroundFetchAsync();
-  }, []);
+  if (loadingLocation || !origin) {
+    return <HomeLoadingScreen />;
+  }
 
   return (
     <>
-      <Sidebar />
       <View style={styles.container}>
         <MapView
           ref={mapRef}
           showsBuildings
           // customMapStyle={online ? MapStyle : undefined}
           showsCompass={false}
-          initialRegion={{
-            latitude: 43.9395387,
-            longitude: -78.71435,
+          region={{
+            ...(origin as LatLng),
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
           provider={PROVIDER_GOOGLE}
           style={[
             styles.map,
-            !newDelivery && { height: !online ? "85%" : "70%" },
+            !newDelivery && { height: "90%" },
             newDelivery && { height: "100%" },
           ]}
         >
-          <Marker
-            image={require("../../assets/location_marker.png")}
-            coordinate={{ latitude: 43.9395387, longitude: -78.71435 }}
-          />
+          <Marker coordinate={origin as LatLng}></Marker>
           {newDeliveryLocation && (
             <Marker
-              image={require("../../assets/store_marker.png")}
+              pinColor="#474744"
+              title={newDelivery?.vendor?.name}
               coordinate={newDeliveryLocation as LatLng}
             />
           )}
           {newDeliveryLocation && (
             <MapViewDirections
-              origin={origin}
+              origin={origin as LatLng}
               destination={newDeliveryLocation}
               apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
               strokeWidth={8}
@@ -347,23 +442,22 @@ export const Home = (props: Props) => {
             />
           )}
         </MapView>
-        {!online && !newDelivery && (
-          <GoOnlineButton handleOnline={handleOnline} />
-        )}
-        {!newDelivery && (
-          <DriverBottomSheet
-            orders={orders}
-            setOnline={setOnline}
-            online={online}
-          />
-        )}
-        {newDelivery && (
-          <NewDeliveryPopup
-            acceptOrder={acceptOrder}
-            setNewDelivery={setnewDelivery}
-            newDelivery={newDelivery}
-          />
-        )}
+        <InteractionButtons
+          online={online}
+          focusDriver={focusDriver}
+          handleOnline={handleOnline}
+        />
+        <DriverBottomSheet
+          delivering={delivering}
+          newDelivery={newDelivery}
+          orders={orders}
+          online={online}
+        />
+        <NewDeliveryPopup
+          acceptOrder={acceptOrder}
+          setNewDelivery={setnewDelivery}
+          newDelivery={newDelivery}
+        />
       </View>
       <StatusBar style="dark" />
     </>
@@ -380,13 +474,17 @@ const styles = StyleSheet.create({
   map: {
     width: "100%",
   },
+  mapMarkerImage: {
+    height: 35,
+    width: 35,
+  },
   bottomContainer: {
     paddingHorizontal: 10,
     paddingVertical: 20,
     backgroundColor: Colors.darkGrey,
     flex: 1,
     position: "relative",
-    height: "15%",
+    height: "10%",
   },
   ordersText: {
     fontSize: 20,

@@ -1,4 +1,12 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SEMI_BOLD } from "../../constants/fontNames";
@@ -62,57 +70,62 @@ export const DriverPhone = ({ navigation, route }: any) => {
 
     const number = `${"+1"}${phoneNumber}`;
     setPhone(number);
-    navigation.navigate("ImageVerification");
+    navigation.navigate("DriverVehicle");
   }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={styles.container}>
-        <View style={styles.innerContainer}>
-          <Text style={styles.mainText}>Enter your mobile number</Text>
-          <Text style={styles.subtitle}>
-            We need this information to verify your identity.
-          </Text>
-          <View style={styles.inputsContainer}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.container}>
+          <View style={styles.innerContainer}>
+            <Text style={styles.mainText}>Enter your mobile number</Text>
+            <Text style={styles.subtitle}>
+              We need this information to verify your identity.
+            </Text>
+            <View style={styles.inputsContainer}>
+              <View
+                style={{
+                  width: 65,
+                  backgroundColor: Colors.gray,
+                  borderRadius: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text style={{ fontSize: 30 }}>🇨🇦</Text>
+              </View>
+              <View style={styles.inputContainer}>
+                <Text style={{ fontSize: 20 }}>+1</Text>
+                <TextInput
+                  autoFocus
+                  keyboardType="phone-pad"
+                  value={phoneNumber}
+                  onChangeText={(text) => handlePhoneNumberChange(text)}
+                  placeholderTextColor={Colors.dark}
+                  placeholder=""
+                  style={styles.input}
+                />
+              </View>
+            </View>
+          </View>
+          <SafeAreaView>
             <View
               style={{
-                width: 65,
-                backgroundColor: Colors.gray,
-                borderRadius: 10,
+                flexDirection: "row",
+                justifyContent: "space-between",
                 alignItems: "center",
-                justifyContent: "center",
+                paddingBottom: 20,
               }}
             >
-              <Text style={{ fontSize: 30 }}>🇨🇦</Text>
+              <BackButton />
+              <NextButton handlePress={handlePress} />
             </View>
-            <View style={styles.inputContainer}>
-              <Text style={{ fontSize: 20 }}>+1</Text>
-              <TextInput
-                autoFocus
-                keyboardType="phone-pad"
-                value={phoneNumber}
-                onChangeText={(text) => handlePhoneNumberChange(text)}
-                placeholderTextColor={Colors.dark}
-                placeholder=""
-                style={styles.input}
-              />
-            </View>
-          </View>
+          </SafeAreaView>
         </View>
-        <SafeAreaView>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingBottom: 20,
-            }}
-          >
-            <BackButton />
-            <NextButton handlePress={handlePress} />
-          </View>
-        </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

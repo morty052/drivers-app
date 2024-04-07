@@ -16,37 +16,49 @@ import { removeItem } from "../../utils/storage";
 import usePlaySound from "../../hooks/useSound";
 import { useDriverStore } from "../../models/driverStore";
 import { orderProps } from "../../types/order";
+import { Button } from "../ui";
+import { SEMI_BOLD } from "../../constants/fontNames";
 
 type Props = {
-  online: boolean;
-  orders: any;
-  newDelivery: any;
-  delivering: any;
+  order: orderProps;
+  accepted: boolean;
 };
 
-function OfflineSheetView() {
-  const navigation = useNavigation();
-  const playSound = usePlaySound();
+function InactiveSheetView({ order }: { order: orderProps }) {
+  const { vendor } = order;
   return (
     <View style={styles.offlineContainer}>
-      {/* <Ionicons
-        onPress={async () => {
-          await playSound();
-        }}
-        name="options-outline"
-        size={20}
-        color={"white"}
-      /> */}
-      <Text style={styles.onlineText}>You're Offline</Text>
-      {/* <Ionicons
-        onPress={() => {
-          removeItem("VERIFIED");
-          removeItem("ONBOARDED");
-        }}
-        name="menu"
-        size={20}
-        color={"white"}
-      /> */}
+      <View style={{ gap: 10 }}>
+        <View
+          style={{
+            justifyContent: "space-between",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 30, fontFamily: SEMI_BOLD }}>
+            {vendor.name}
+          </Text>
+          <View style={styles.callIconContainer}>
+            <Ionicons name="call" size={30} color={Colors.darkGrey} />
+          </View>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Ionicons name="location-outline" size={30} color={Colors.light} />
+          <Text style={{ color: "white", fontSize: 18 }}>
+            {order?.vendor?.address?.street}
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Ionicons name="fast-food-outline" size={30} color={Colors.light} />
+          <Text style={{ color: "white", fontSize: 18 }}>
+            1 order for pickup
+          </Text>
+        </View>
+      </View>
+      <View style={{}}>
+        <Button variant="primary" title="Accept Delivery" />
+      </View>
     </View>
   );
 }
@@ -63,10 +75,10 @@ function OnlineView({ orders }: { orders: any }) {
       <Text style={{ color: "white", textAlign: "center" }}>
         Available orders nearby: {orders?.length}
       </Text>
-      <View style={{ marginTop: 10 }}>
+      {/* <View style={{ marginTop: 10 }}>
         {orders?.map((order: orderProps, index: number) => {
-          const { vendor } = order;
-          const { city, province, street, postal_code } = vendor.address;
+          const { vendor_address } = order;
+          const { city, province, street, postal_code } = vendor_address;
           const address = `${street} `;
           return (
             <Pressable
@@ -88,10 +100,10 @@ function OnlineView({ orders }: { orders: any }) {
             >
               <Image
                 style={{ height: 70, width: 70, borderRadius: 10 }}
-                source={{ uri: order?.vendor.image }}
+                source={{ uri: order?.vendor_logo }}
               />
               <View style={{ flex: 1 }}>
-                <Text style={{ color: "black" }}>{order?.vendor.name}</Text>
+                <Text style={{ color: "black" }}>{order?.vendor}</Text>
                 <Text style={{ color: "black" }}>{address}</Text>
                 <Text style={{ color: "black" }}>${order?.total}</Text>
               </View>
@@ -103,7 +115,7 @@ function OnlineView({ orders }: { orders: any }) {
             </Pressable>
           );
         })}
-      </View>
+      </View> */}
     </View>
   );
 }
@@ -119,20 +131,11 @@ function DeliveryView() {
   );
 }
 
-export const DriverBottomSheet = ({
-  online,
-  orders,
-  newDelivery,
-  delivering,
-}: Props) => {
+export const OrderBottomSheet = ({ order, accepted }: Props) => {
   const snapPoints = React.useMemo(
-    () => (online ? ["30%", "50%", "70%"] : ["10%"]),
-    [online]
+    () => (accepted ? ["40%", "70%", "90%"] : ["30%"]),
+    []
   );
-
-  if (newDelivery) {
-    return null;
-  }
 
   return (
     <BottomSheet
@@ -145,8 +148,7 @@ export const DriverBottomSheet = ({
       index={0}
       snapPoints={snapPoints}
     >
-      {!online && <OfflineSheetView />}
-      {online && <OnlineView orders={orders} />}
+      {!accepted && <InactiveSheetView order={order} />}
     </BottomSheet>
   );
 };
@@ -163,18 +165,23 @@ const styles = StyleSheet.create({
     // height: "15%",
   },
   offlineContainer: {
-    paddingHorizontal: 25,
-    paddingBottom: Platform.select({ ios: 30, android: 0 }),
-    // backgroundColor: Colors.darkGrey,
+    paddingHorizontal: 20,
+    paddingBottom: Platform.select({ ios: 30, android: 30 }),
+    justifyContent: "space-between",
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    // height: "15%",
   },
   onlineText: {
     fontSize: 20,
     textAlign: "center",
     color: Colors.primary,
+  },
+  callIconContainer: {
+    backgroundColor: Colors.light,
+    height: 50,
+    width: 50,
+    marginTop: 10,
+    borderRadius: 25,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

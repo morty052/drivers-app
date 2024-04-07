@@ -3,12 +3,42 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/colors";
 import { SEMI_BOLD } from "../../constants/fontNames";
+import { baseUrl } from "../../constants/baseUrl";
+import { setItem } from "../../utils/storage";
 
 export const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
+  const [error, setError] = React.useState<string | unknown>();
 
-  async function handleLogin() {}
+  async function handleLogin() {
+    try {
+      if (!email || !password) {
+        throw "Please enter both fields to continue";
+      }
+      const res = await fetch(
+        `${baseUrl}/drivers/login?email=${email}&password=${password}`
+      );
+      const data = await res.json();
+      const { status, firstname, lastname, vehicle, avatar, _id, phone } = data;
+
+      const driverDetails = {
+        _id,
+        email,
+        firstname,
+        lastname,
+        phone,
+      };
+
+      if (status.error) {
+        console.error(status);
+        throw "Something went wrong please check email and password";
+      }
+      setItem("driverDetails", JSON.stringify(driverDetails));
+    } catch (error) {
+      setError(error);
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "ghostwhite" }}>
@@ -36,7 +66,9 @@ export const LoginScreen = ({ navigation }: any) => {
             value={password}
             onChangeText={(text) => setPassword(text)}
           />
-          <Text>Forgot Password?</Text>
+          <Text onPress={() => navigation.navigate("HomeStack")}>
+            Forgot Password?
+          </Text>
         </View>
         <Pressable onPress={handleLogin} style={styles.button}>
           <Text style={styles.buttonText}>Login</Text>

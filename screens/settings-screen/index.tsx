@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, View } from "react-native";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/colors";
@@ -48,6 +48,7 @@ export const SettingsHomePage = () => {
   const lastname = getItem("lastname");
   const phone = getItem("phone");
   const email = getItem("email");
+  const avatar = getItem("avatar");
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.darkGrey }}>
       <View style={styles.container}>
@@ -62,7 +63,8 @@ export const SettingsHomePage = () => {
             }}
           >
             <Text style={styles.name}>{firstname}</Text>
-            <View
+            <Image
+              resizeMode="cover"
               style={{
                 borderWidth: 1,
                 borderColor: Colors.light,
@@ -70,7 +72,8 @@ export const SettingsHomePage = () => {
                 width: 60,
                 borderRadius: 30,
               }}
-            ></View>
+              source={{ uri: avatar }}
+            />
           </View>
           {/* HR */}
           <View style={{ backgroundColor: Colors.gray, height: 1 }}></View>

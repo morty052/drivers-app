@@ -3,13 +3,11 @@ import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
-import { useSibebarStore } from "../../models/sidebarStore";
 
 type Props = {};
 
 export const MenuButton = (props: Props) => {
   const navigation = useNavigation();
-  const { openSidebar } = useSibebarStore();
 
   function handleOpenSidebar() {
     // @ts-ignore

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { baseUrl } from "../constants/baseUrl";
 import { getItem, setItem } from "../utils/storage";
+import { vehicleTypes } from "../types/vehicleTypes";
 
 type OnboardingStoreProps = {
   _type: "drivers";
@@ -38,12 +39,18 @@ type OnboardingStoreProps = {
   email: string;
   phone: string;
   password: string;
+  vehicle: {
+    car: boolean;
+    motorbike: boolean;
+    bicycle: boolean;
+  };
   expo_push_token: string;
   verified: false;
   onboarded: boolean;
   setLoginDetails: (email: string, password: string) => void;
   setDriverNames: (firstname: string, lastname: string) => void;
   setPhone: (phone: string) => void;
+  setVehicle: (vehicle: vehicleTypes) => void;
   setAvatar: (avatar: string) => void;
   setDlFront: (dl_front: string) => void;
   setDlBack: (dl_back: string) => void;
@@ -88,6 +95,11 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
     email: "",
     phone: "",
     password: "",
+    vehicle: {
+      car: false,
+      motorbike: false,
+      bicycle: false,
+    },
     onboarded: false,
     verified: false,
     expo_push_token: getItem("expo_push_token") || "",
@@ -102,6 +114,27 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
     },
 
     setPhone: (phone) => set({ phone }),
+    setVehicle: (vehicle) => {
+      const vehicleObject = {
+        Car: {
+          car: true,
+          motorbike: false,
+          bicycle: false,
+        },
+        MotorBike: {
+          car: false,
+          motorbike: true,
+          bicycle: false,
+        },
+        Bicycle: {
+          car: false,
+          motorbike: false,
+          bicycle: true,
+        },
+      };
+      set({ vehicle: vehicleObject[vehicle as keyof typeof vehicleObject] });
+      console.log(state().vehicle);
+    },
     setAvatar: (avatar) =>
       set({
         avatar: {
@@ -153,7 +186,15 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         dl_back,
         selfie,
         expo_push_token,
+        vehicle,
       } = state();
+
+      const latitude = getItem("latitude");
+      const longitude = getItem("longitude");
+      const location = {
+        lat: Number(latitude),
+        lng: Number(longitude),
+      };
 
       const newDriver = {
         _type,
@@ -169,6 +210,8 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         expo_push_token,
         verified: false,
         onboarded: false,
+        vehicle,
+        location,
       };
 
       const res = await fetch(`${baseUrl}/drivers/create`, {
@@ -179,12 +222,22 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         body: JSON.stringify(newDriver),
       });
       const data = await res.json();
-      const { status, _id } = data;
+      const { status, _id, avatar: driverAvatar } = data;
       setItem("_id", `${_id}`);
       setItem("email", `${email}`);
       setItem("firstname", `${firstname}`);
       setItem("lastname", `${lastname}`);
       setItem("phone", `${phone}`);
+      setItem("avatar", `${driverAvatar}`);
+      const driverDetails = {
+        _id,
+        email,
+        firstname,
+        lastname,
+        phone,
+        avatar,
+      };
+      setItem("driverDetails", JSON.stringify(driverDetails));
       return data;
     },
   })

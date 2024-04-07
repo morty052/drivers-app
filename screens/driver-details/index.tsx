@@ -1,4 +1,12 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SEMI_BOLD } from "../../constants/fontNames";
@@ -64,44 +72,49 @@ export const DriverDetails = ({ navigation, route }: any) => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <View style={styles.container}>
-        <View style={styles.innerContainer}>
-          <Text style={styles.mainText}>What's your name?</Text>
-          <Text style={styles.subtitle}>
-            Let us know how we can address you.
-          </Text>
-          <View style={styles.inputsContainer}>
-            <TextInput
-              autoFocus
-              value={firstName}
-              onChangeText={(text) => setFirstName(text)}
-              placeholderTextColor={Colors.dark}
-              placeholder="First Name"
-              style={styles.input}
-            />
-            <TextInput
-              value={lastName}
-              onChangeText={(text) => setLastName(text)}
-              placeholderTextColor={Colors.dark}
-              placeholder="Last Name"
-              style={styles.input}
-            />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.container}>
+          <View style={styles.innerContainer}>
+            <Text style={styles.mainText}>What's your name?</Text>
+            <Text style={styles.subtitle}>
+              Let us know how we can address you.
+            </Text>
+            <View style={styles.inputsContainer}>
+              <TextInput
+                autoFocus
+                value={firstName}
+                onChangeText={(text) => setFirstName(text)}
+                placeholderTextColor={Colors.dark}
+                placeholder="First Name"
+                style={styles.input}
+              />
+              <TextInput
+                value={lastName}
+                onChangeText={(text) => setLastName(text)}
+                placeholderTextColor={Colors.dark}
+                placeholder="Last Name"
+                style={styles.input}
+              />
+            </View>
           </View>
+          <SafeAreaView>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingBottom: 20,
+              }}
+            >
+              <BackButton />
+              <NextButton handlePress={handlePress} />
+            </View>
+          </SafeAreaView>
         </View>
-        <SafeAreaView>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingBottom: 20,
-            }}
-          >
-            <BackButton />
-            <NextButton handlePress={handlePress} />
-          </View>
-        </SafeAreaView>
-      </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };

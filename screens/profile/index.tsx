@@ -123,18 +123,20 @@ function DriverAddress() {
 }
 
 export const Profile = ({ navigation }: any) => {
+  const firstname = getItem("firstname");
+  const avatar = getItem("avatar");
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <View style={styles.container}>
         <Image
           resizeMode="cover"
           source={{
-            uri: "https://th.bing.com/th/id/R.271c861d66e03d7823b5ade4e0fce7c7?rik=ATfl%2fk68OaAwxQ&pid=ImgRaw&r=0",
+            uri: avatar,
           }}
           style={styles.image}
         />
         <View style={{ gap: 10 }}>
-          <Text style={styles.driverNameText}>Yahmnan</Text>
+          <Text style={styles.driverNameText}>{firstname}</Text>
           <Text style={styles.deliverySinceText}>0 deliveries since 2024</Text>
         </View>
         <DeliveryInfo />

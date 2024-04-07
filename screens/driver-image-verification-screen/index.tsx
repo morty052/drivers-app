@@ -17,7 +17,13 @@ export function DriverImageVerification({ navigation }: any) {
   const { hasPermission, requestPermission } = useCameraPermission();
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        title: "",
+        headerBackTitleVisible: false,
+      }}
+    >
       <Stack.Screen
         name="VerificationInfo"
         component={VerificationInfoScreen}
