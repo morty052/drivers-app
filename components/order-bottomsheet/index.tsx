@@ -22,9 +22,16 @@ import { SEMI_BOLD } from "../../constants/fontNames";
 type Props = {
   order: orderProps;
   accepted: boolean;
+  handleAccept: () => void;
 };
 
-function InactiveSheetView({ order }: { order: orderProps }) {
+function InactiveSheetView({
+  order,
+  handleAccept,
+}: {
+  order: orderProps;
+  handleAccept?: () => void;
+}) {
   const { vendor } = order;
   return (
     <View style={styles.offlineContainer}>
@@ -43,13 +50,13 @@ function InactiveSheetView({ order }: { order: orderProps }) {
             <Ionicons name="call" size={30} color={Colors.darkGrey} />
           </View>
         </View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
           <Ionicons name="location-outline" size={30} color={Colors.light} />
           <Text style={{ color: "white", fontSize: 18 }}>
             {order?.vendor?.address?.street}
           </Text>
         </View>
-        <View style={{ flexDirection: "row", gap: 10 }}>
+        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
           <Ionicons name="fast-food-outline" size={30} color={Colors.light} />
           <Text style={{ color: "white", fontSize: 18 }}>
             1 order for pickup
@@ -57,7 +64,11 @@ function InactiveSheetView({ order }: { order: orderProps }) {
         </View>
       </View>
       <View style={{}}>
-        <Button variant="primary" title="Accept Delivery" />
+        <Button
+          onPress={handleAccept}
+          variant="primary"
+          title="Accept Delivery"
+        />
       </View>
     </View>
   );
@@ -131,9 +142,9 @@ function DeliveryView() {
   );
 }
 
-export const OrderBottomSheet = ({ order, accepted }: Props) => {
+export const OrderBottomSheet = ({ order, accepted, handleAccept }: Props) => {
   const snapPoints = React.useMemo(
-    () => (accepted ? ["40%", "70%", "90%"] : ["30%"]),
+    () => (accepted ? ["40%", "70%", "90%"] : ["40%"]),
     []
   );
 
@@ -148,7 +159,9 @@ export const OrderBottomSheet = ({ order, accepted }: Props) => {
       index={0}
       snapPoints={snapPoints}
     >
-      {!accepted && <InactiveSheetView order={order} />}
+      {!accepted && (
+        <InactiveSheetView handleAccept={handleAccept} order={order} />
+      )}
     </BottomSheet>
   );
 };

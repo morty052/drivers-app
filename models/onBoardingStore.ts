@@ -237,7 +237,7 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         phone,
         avatar,
       };
-      setItem("driverDetails", JSON.stringify(driverDetails));
+      setItem("DRIVER_DETAILS", JSON.stringify(driverDetails));
       return data;
     },
   })

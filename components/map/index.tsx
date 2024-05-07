@@ -3,27 +3,29 @@ import React from "react";
 import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import MapViewDirections from "react-native-maps-directions";
 import Colors from "../../constants/colors";
+import driver_marker from "../../assets/location_marker.png";
+import store_marker from "../../assets/store_marker.png";
+import user_marker from "../../assets/user_marker.png";
 
 type Props = {
   mapRef: any;
   origin: LatLng;
   pickupLocation: any;
   height: any;
+  delivery_location: any;
+  delivering: boolean;
 };
 
 const GOOGLE_MAPS_DIRECTIONS_APIKEY = "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
 
-const Map = ({ mapRef, origin, pickupLocation, height }: Props) => {
-  const animateToStore = () => {
-    mapRef.current.fitToCoordinates(
-      [pickupLocation?.coords, origin as LatLng],
-      {
-        animated: true,
-        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-      }
-    );
-  };
-
+const Map = ({
+  mapRef,
+  origin,
+  pickupLocation,
+  height,
+  delivery_location,
+  delivering,
+}: Props) => {
   return (
     <MapView
       ref={mapRef}
@@ -38,19 +40,50 @@ const Map = ({ mapRef, origin, pickupLocation, height }: Props) => {
       provider={PROVIDER_GOOGLE}
       style={[styles.map, { height }]}
     >
-      <Marker coordinate={origin as LatLng} />
+      <Marker coordinate={origin as LatLng}>
+        <View style={{ height: 50, width: 50 }}>
+          <Image
+            resizeMode="contain"
+            style={{ height: 50, width: 50, alignSelf: "center" }}
+            source={driver_marker}
+          />
+        </View>
+      </Marker>
 
       {pickupLocation && (
         <Marker
           pinColor="#474744"
-          title={pickupLocation?.vendor?.name}
+          title={pickupLocation?.name}
           coordinate={pickupLocation.coords as LatLng}
-        />
+        >
+          <View style={{ height: 70, width: 70 }}>
+            <Image
+              resizeMode="contain"
+              style={{ height: 70, width: 70, alignSelf: "center" }}
+              source={store_marker}
+            />
+          </View>
+        </Marker>
+      )}
+      {delivering && (
+        <Marker
+          title={delivery_location.address}
+          coordinate={delivery_location.coords as LatLng}
+        >
+          <View style={{ height: 70, width: 70 }}>
+            <Image
+              resizeMode="contain"
+              style={{ height: 70, width: 70, alignSelf: "center" }}
+              source={user_marker}
+            />
+          </View>
+        </Marker>
       )}
       <MapViewDirections
-        onStart={() => animateToStore()}
         origin={origin}
-        destination={pickupLocation.coords}
+        destination={
+          !delivering ? pickupLocation.coords : delivery_location.coords
+        }
         apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
         strokeWidth={8}
         strokeColor={Colors.primary}

@@ -20,7 +20,10 @@ export const LoginScreen = ({ navigation }: any) => {
         `${baseUrl}/drivers/login?email=${email}&password=${password}`
       );
       const data = await res.json();
-      const { status, firstname, lastname, vehicle, avatar, _id, phone } = data;
+      const { status, driver } = data;
+
+      const { firstname, lastname, vehicle, avatar, _id, phone } = driver;
+      console.log(data);
 
       const driverDetails = {
         _id,
@@ -28,15 +31,27 @@ export const LoginScreen = ({ navigation }: any) => {
         firstname,
         lastname,
         phone,
+        avatar,
+        vehicle,
       };
 
       if (status.error) {
         console.error(status);
         throw "Something went wrong please check email and password";
       }
-      setItem("driverDetails", JSON.stringify(driverDetails));
+      setItem("_id", `${_id}`);
+      setItem("email", `${email}`);
+      setItem("firstname", `${firstname}`);
+      setItem("lastname", `${lastname}`);
+      setItem("phone", `${phone}`);
+      setItem("avatar", `${avatar}`);
+      setItem("vehicle", `${vehicle}`);
+      setItem("DRIVER_DETAILS", JSON.stringify(driverDetails));
+      setItem("ONBOARDED", "TRUE");
+      navigation.navigate("HomeStack");
     } catch (error) {
       setError(error);
+      console.error(error);
     }
   }
 

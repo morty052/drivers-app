@@ -16,38 +16,34 @@ export const OrderScreen = ({
   route: any;
 }) => {
   const [accepted, setAccepted] = React.useState(false);
+  const [delivering, setDelivering] = React.useState(false);
   const mapRef = React.useRef<MapView>(null);
   const { order }: { order: orderProps } = route.params;
-  const { vendor_location } = order;
+  const { vendor_location, user_location, vendor, delivery_address } = order;
 
   const { lat, lng } = vendor_location;
+  const { name } = vendor;
 
   const pickupLocation = {
     coords: {
       latitude: Number(lat),
       longitude: Number(lng),
     },
+    name,
+  };
+
+  const deliveryLocation = {
+    coords: {
+      latitude: Number(user_location.lat),
+      longitude: Number(user_location.lng),
+    },
+    address: delivery_address,
   };
 
   const { location: origin, loadingLocation } = useDriverLocation();
 
-  //   React.useLayoutEffect(() => {
-  //     navigation.setOptions({
-  //       headerTitle: order.vendor,
-  //     });
-  //   }, []);
-
-  const animateToStore = () => {
-    console.log(origin);
-    if (mapRef.current) {
-      mapRef.current.fitToCoordinates(
-        [{ latitude: lat, longitude: lng }, origin as LatLng],
-        {
-          animated: true,
-          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-        }
-      );
-    }
+  const handleAccept = () => {
+    setDelivering(true);
   };
 
   if (loadingLocation || !origin) {
@@ -57,12 +53,18 @@ export const OrderScreen = ({
   return (
     <View style={styles.container}>
       <Map
+        delivering={delivering}
+        delivery_location={deliveryLocation}
         height={!accepted ? "70%" : "60%"}
         mapRef={mapRef}
         pickupLocation={pickupLocation}
         origin={origin as LatLng}
       />
-      <OrderBottomSheet accepted={accepted} order={order} />
+      <OrderBottomSheet
+        handleAccept={handleAccept}
+        accepted={accepted}
+        order={order}
+      />
     </View>
   );
 };

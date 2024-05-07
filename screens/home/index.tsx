@@ -1,11 +1,6 @@
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
-import React, { useMemo } from "react";
-import MapView, {
-  Callout,
-  LatLng,
-  Marker,
-  PROVIDER_GOOGLE,
-} from "react-native-maps";
+import React from "react";
+import MapView, { LatLng, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import Colors from "../../constants/colors";
 import { DriverBottomSheet } from "../../components/driver-bottomsheet";
@@ -23,6 +18,9 @@ import { useDriverStore } from "../../models/driverStore";
 import HomeLoadingScreen from "./components/HomeLoadingScreen";
 import { EarningsIndicator } from "../../components/earnings-indicator";
 import { MenuButton } from "../../components/menu-button";
+import driver_marker from "../../assets/location_marker.png";
+import store_marker from "../../assets/store_marker.png";
+import InteractionButtons from "./components/InteractionButtons";
 
 type Props = {};
 
@@ -46,105 +44,6 @@ type NewdeliveryProps = {
     lat: number;
     lng: number;
   };
-};
-
-const InteractionButtons = ({
-  handleOnline,
-  focusDriver,
-  online,
-}: {
-  handleOnline: () => void;
-  focusDriver: () => void;
-  online: boolean;
-}) => {
-  if (online) {
-    return null;
-  }
-
-  return (
-    <View
-      style={{
-        position: "absolute",
-        // backgroundColor: "red",
-        left: 0,
-        right: 0,
-        bottom: "12%",
-        zIndex: 1,
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexDirection: "row",
-        paddingHorizontal: 20,
-      }}
-    >
-      <Pressable
-        style={{
-          height: 40,
-          width: 40,
-          borderRadius: 20,
-          backgroundColor: "white",
-          alignItems: "center",
-          justifyContent: "center",
-          elevation: 10,
-          shadowColor: "black",
-          shadowOffset: {
-            width: 0,
-            height: 10,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.5,
-        }}
-        // onPress={() => {
-        //   setItem("latitude", "43.9395387");
-        //   setItem("longitude", "-78.81455");
-        // }}
-      >
-        <Ionicons name="storefront-outline" size={25} color="black" />
-      </Pressable>
-      <Pressable
-        onPress={() => handleOnline()}
-        style={{
-          height: 80,
-          width: 80,
-          borderRadius: 50,
-          backgroundColor: Colors.primary,
-          alignItems: "center",
-          justifyContent: "center",
-          elevation: 10,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 25,
-            color: "white",
-            fontFamily: SEMI_BOLD,
-          }}
-        >
-          Go
-        </Text>
-      </Pressable>
-      <Pressable
-        style={{
-          height: 40,
-          width: 40,
-          borderRadius: 20,
-          backgroundColor: "white",
-          alignItems: "center",
-          justifyContent: "center",
-          elevation: 10,
-          shadowColor: "black",
-          shadowOffset: {
-            width: 0,
-            height: 10,
-          },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.5,
-        }}
-        onPress={focusDriver}
-      >
-        <Ionicons name="location-outline" size={30} color="black" />
-      </Pressable>
-    </View>
-  );
 };
 
 const NewDeliveryPopup = ({
@@ -320,15 +219,12 @@ export const Home = ({ navigation }: any) => {
 
   const { location: origin, loadingLocation } = useDriverLocation();
 
-  const animateToStore = ({ lat, lng }: { lat: number; lng: number }) => {
+  const animateToStore = () => {
     if (mapRef.current) {
-      mapRef.current.fitToCoordinates(
-        [{ latitude: lat, longitude: lng }, origin as LatLng],
-        {
-          animated: true,
-          edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-        }
-      );
+      mapRef.current.fitToElements({
+        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        animated: true,
+      });
     }
   };
 
@@ -374,15 +270,11 @@ export const Home = ({ navigation }: any) => {
     socket?.on("NEW_DELIVERY", async (data: { order: NewdeliveryProps[] }) => {
       setnewDelivery(data.order[0]);
       const vendor_location = data.order[0].vendor_location;
-      console.log(data.order[0]);
       setnewDeliveryLocation({
         latitude: Number(vendor_location.lat),
         longitude: Number(vendor_location.lng),
       });
-      animateToStore({
-        lat: Number(vendor_location.lat),
-        lng: Number(vendor_location.lng),
-      });
+      animateToStore();
       await playSound();
     });
   }, [socket]);
@@ -408,8 +300,8 @@ export const Home = ({ navigation }: any) => {
     <>
       <View style={styles.container}>
         <MapView
+          googleRenderer={"LEGACY"}
           ref={mapRef}
-          showsBuildings
           // customMapStyle={online ? MapStyle : undefined}
           showsCompass={false}
           region={{
@@ -424,13 +316,29 @@ export const Home = ({ navigation }: any) => {
             newDelivery && { height: "100%" },
           ]}
         >
-          <Marker coordinate={origin as LatLng}></Marker>
+          <Marker coordinate={origin as LatLng}>
+            <View style={{ height: 50, width: 50 }}>
+              <Image
+                resizeMode="contain"
+                style={{ height: 50, width: 50, alignSelf: "center" }}
+                source={driver_marker}
+              />
+            </View>
+          </Marker>
           {newDeliveryLocation && (
             <Marker
               pinColor="#474744"
               title={newDelivery?.vendor?.name}
               coordinate={newDeliveryLocation as LatLng}
-            />
+            >
+              <View style={{ height: 70, width: 70 }}>
+                <Image
+                  resizeMode="contain"
+                  style={{ height: 70, width: 70, alignSelf: "center" }}
+                  source={store_marker}
+                />
+              </View>
+            </Marker>
           )}
           {newDeliveryLocation && (
             <MapViewDirections

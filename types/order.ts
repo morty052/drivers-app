@@ -16,6 +16,15 @@ export type orderProps = {
       lng: number;
     };
   };
+  vendor_location: {
+    lat: number;
+    lng: number;
+  };
+  user_location: {
+    lat: number;
+    lng: number;
+  };
+  delivery_address: string;
   user: {
     user_firstname: string;
   };
