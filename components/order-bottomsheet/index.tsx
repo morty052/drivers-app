@@ -18,6 +18,7 @@ import { useDriverStore } from "../../models/driverStore";
 import { orderProps } from "../../types/order";
 import { Button } from "../ui";
 import { SEMI_BOLD } from "../../constants/fontNames";
+import * as Linking from "expo-linking";
 
 type Props = {
   order: orderProps;
@@ -46,9 +47,9 @@ function InactiveSheetView({
           <Text style={{ color: "white", fontSize: 30, fontFamily: SEMI_BOLD }}>
             {vendor.name}
           </Text>
-          <View style={styles.callIconContainer}>
+          {/* <View style={styles.callIconContainer}>
             <Ionicons name="call" size={30} color={Colors.darkGrey} />
-          </View>
+          </View> */}
         </View>
         <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
           <Ionicons name="location-outline" size={30} color={Colors.light} />
@@ -131,21 +132,58 @@ function OnlineView({ orders }: { orders: any }) {
   );
 }
 
-function DeliveryView() {
+function ActiveSheetView({
+  order,
+  handleAccept,
+}: {
+  order: orderProps;
+  handleAccept?: () => void;
+}) {
+  const { vendor } = order;
+
+  const openUrl = React.useCallback(async () => {
+    await Linking.openURL("tel:+1 23456789");
+  }, []);
+
   return (
-    <View>
-      <Text style={styles.onlineText}>You're Online</Text>
-      <Text style={{ color: "white", textAlign: "center" }}>
-        Available orders nearby: 3
-      </Text>
+    <View style={styles.offlineContainer}>
+      <View style={{ gap: 10 }}>
+        <View
+          style={{
+            justifyContent: "space-between",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 20, fontFamily: SEMI_BOLD }}>
+            {vendor.name}
+          </Text>
+          <Ionicons name="call" size={30} color={Colors.darkGrey} />
+          <Pressable onPress={openUrl} style={styles.callIconContainer}>
+            <Ionicons name="call" size={20} color={Colors.darkGrey} />
+          </Pressable>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+          <Ionicons name="location-outline" size={20} color={Colors.light} />
+          <Text style={{ color: "white", fontSize: 18 }}>
+            {order?.vendor?.address?.street}
+          </Text>
+        </View>
+        <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+          <Ionicons name="fast-food-outline" size={20} color={Colors.light} />
+          <Text style={{ color: "white", fontSize: 18 }}>
+            1 order for pickup
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }
 
 export const OrderBottomSheet = ({ order, accepted, handleAccept }: Props) => {
   const snapPoints = React.useMemo(
-    () => (accepted ? ["40%", "70%", "90%"] : ["40%"]),
-    []
+    () => (accepted ? ["10%", "30%"] : ["30%"]),
+    [accepted]
   );
 
   return (
@@ -161,6 +199,9 @@ export const OrderBottomSheet = ({ order, accepted, handleAccept }: Props) => {
     >
       {!accepted && (
         <InactiveSheetView handleAccept={handleAccept} order={order} />
+      )}
+      {accepted && (
+        <ActiveSheetView handleAccept={handleAccept} order={order} />
       )}
     </BottomSheet>
   );
@@ -190,8 +231,8 @@ const styles = StyleSheet.create({
   },
   callIconContainer: {
     backgroundColor: Colors.light,
-    height: 50,
-    width: 50,
+    height: 35,
+    width: 35,
     marginTop: 10,
     borderRadius: 25,
     justifyContent: "center",

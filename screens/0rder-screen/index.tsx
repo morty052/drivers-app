@@ -44,7 +44,19 @@ export const OrderScreen = ({
 
   const handleAccept = () => {
     setDelivering(true);
+    setAccepted(true);
   };
+
+  React.useEffect(() => {
+    if (!pickupLocation) {
+      return;
+    }
+    mapRef.current?.fitToElements({
+      edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+      animated: true,
+    });
+    console.log("done");
+  }, [pickupLocation]);
 
   if (loadingLocation || !origin) {
     return null;
@@ -53,10 +65,10 @@ export const OrderScreen = ({
   return (
     <View style={styles.container}>
       <Map
+        ref={mapRef}
         delivering={delivering}
         delivery_location={deliveryLocation}
-        height={!accepted ? "70%" : "60%"}
-        mapRef={mapRef}
+        height={!accepted ? "70%" : "90%"}
         pickupLocation={pickupLocation}
         origin={origin as LatLng}
       />

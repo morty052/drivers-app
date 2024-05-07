@@ -6,9 +6,9 @@ import Colors from "../../constants/colors";
 import driver_marker from "../../assets/location_marker.png";
 import store_marker from "../../assets/store_marker.png";
 import user_marker from "../../assets/user_marker.png";
+// import DriverMarker from "./markers/DriverMarker";
 
 type Props = {
-  mapRef: any;
   origin: LatLng;
   pickupLocation: any;
   height: any;
@@ -18,17 +18,22 @@ type Props = {
 
 const GOOGLE_MAPS_DIRECTIONS_APIKEY = "AIzaSyDK51O-aWGsxDgTkr2B9qRBwUzMPjyeuZs";
 
-const Map = ({
-  mapRef,
-  origin,
-  pickupLocation,
-  height,
-  delivery_location,
-  delivering,
-}: Props) => {
+const Map = React.forwardRef<MapView, Props>(function Map(
+  { origin, pickupLocation, height, delivery_location, delivering },
+  ref
+) {
+  const animateToStore = () => {
+    if (ref.current) {
+      ref.current.fitToElements({
+        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+        animated: true,
+      });
+    }
+  };
+
   return (
     <MapView
-      ref={mapRef}
+      ref={ref}
       showsBuildings
       // customMapStyle={online ? MapStyle : undefined}
       showsCompass={false}
@@ -47,6 +52,7 @@ const Map = ({
             style={{ height: 50, width: 50, alignSelf: "center" }}
             source={driver_marker}
           />
+          {/* <DriverMarker /> */}
         </View>
       </Marker>
 
@@ -80,17 +86,97 @@ const Map = ({
         </Marker>
       )}
       <MapViewDirections
+        onReady={animateToStore}
         origin={origin}
         destination={
           !delivering ? pickupLocation.coords : delivery_location.coords
         }
         apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
-        strokeWidth={8}
-        strokeColor={Colors.primary}
+        strokeWidth={6}
+        strokeColor={Colors.link}
       />
     </MapView>
   );
-};
+});
+
+// const Map = React.forwardRef(
+//   ({
+//     mapRef,
+//     origin,
+//     pickupLocation,
+//     height,
+//     delivery_location,
+//     delivering,
+//   }: Props) => {
+//     return (
+//       <MapView
+//         ref={mapRef}
+//         showsBuildings
+//         // customMapStyle={online ? MapStyle : undefined}
+//         showsCompass={false}
+//         region={{
+//           ...origin,
+//           latitudeDelta: 0.0922,
+//           longitudeDelta: 0.0421,
+//         }}
+//         provider={PROVIDER_GOOGLE}
+//         style={[styles.map, { height }]}
+//       >
+//         <Marker tracksViewChanges={false} coordinate={origin as LatLng}>
+//           <View style={{ height: 50, width: 50 }}>
+//             <Image
+//               resizeMode="contain"
+//               style={{ height: 50, width: 50, alignSelf: "center" }}
+//               source={driver_marker}
+//             />
+//           </View>
+//         </Marker>
+
+//         {pickupLocation && (
+//           <Marker
+//             tracksViewChanges={false}
+//             pinColor="#474744"
+//             title={pickupLocation?.name}
+//             coordinate={pickupLocation.coords as LatLng}
+//           >
+//             <View style={{ height: 70, width: 70 }}>
+//               <Image
+//                 resizeMode="contain"
+//                 style={{ height: 70, width: 70, alignSelf: "center" }}
+//                 source={store_marker}
+//               />
+//             </View>
+//           </Marker>
+//         )}
+//         {delivering && (
+//           <Marker
+//             title={delivery_location.address}
+//             coordinate={delivery_location.coords as LatLng}
+//           >
+//             <View style={{ height: 70, width: 70 }}>
+//               <Image
+//                 resizeMode="contain"
+//                 style={{ height: 70, width: 70, alignSelf: "center" }}
+//                 source={user_marker}
+//               />
+//             </View>
+//           </Marker>
+//         )}
+//         <MapViewDirections
+//           origin={origin}
+//           destination={
+//             !delivering ? pickupLocation.coords : delivery_location.coords
+//           }
+//           apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
+//           strokeWidth={8}
+//           strokeColor={Colors.primary}
+//         />
+//       </MapView>
+//     );
+//   }
+// );
+// {
+// }
 
 export default Map;
 

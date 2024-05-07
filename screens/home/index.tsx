@@ -300,7 +300,6 @@ export const Home = ({ navigation }: any) => {
     <>
       <View style={styles.container}>
         <MapView
-          googleRenderer={"LEGACY"}
           ref={mapRef}
           // customMapStyle={online ? MapStyle : undefined}
           showsCompass={false}
@@ -316,7 +315,7 @@ export const Home = ({ navigation }: any) => {
             newDelivery && { height: "100%" },
           ]}
         >
-          <Marker coordinate={origin as LatLng}>
+          <Marker tracksViewChanges={false} coordinate={origin as LatLng}>
             <View style={{ height: 50, width: 50 }}>
               <Image
                 resizeMode="contain"
