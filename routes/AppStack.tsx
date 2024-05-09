@@ -1,28 +1,22 @@
-import { View, Text } from "react-native";
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   DriverDetails,
   DriverImageVerification,
   DriverPhone,
-  Home,
   LocationPermissionScreen,
   LoginScreen,
   RegisterScreen,
   VehicleTypeScreen,
 } from "../screens";
-import { Header } from "../components";
-import { MenuButton } from "../components/menu-button";
-import { EarningsIndicator } from "../components/earnings-indicator";
+
 import { HomeStack } from "./HomeStack";
-import SocketContextComponent from "../contexts/SocketContextComponent";
 import DriverAvatarScreen from "../screens/driver-avatar-screen";
 import { OrderScreen } from "../screens/0rder-screen";
 import { orderProps } from "../types/order";
 import { BackButton } from "../components/back-button";
 import Test from "../screens/Test";
 
-type Props = {};
 type RootStackParamList = {
   HomeStack: undefined;
   Login: undefined;

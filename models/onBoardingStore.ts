@@ -185,12 +185,14 @@ export const useOnboardingStore = create<OnboardingStoreProps>(
         dl_front,
         dl_back,
         selfie,
-        expo_push_token,
         vehicle,
       } = state();
 
       const latitude = getItem("latitude");
       const longitude = getItem("longitude");
+
+      const expo_push_token = getItem("expo_push_token");
+
       const location = {
         lat: Number(latitude),
         lng: Number(longitude),
