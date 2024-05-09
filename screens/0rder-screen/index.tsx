@@ -68,7 +68,7 @@ export const OrderScreen = ({
         ref={mapRef}
         delivering={delivering}
         delivery_location={deliveryLocation}
-        height={!accepted ? "70%" : "90%"}
+        height={!accepted ? "70%" : "80%"}
         pickupLocation={pickupLocation}
         origin={origin as LatLng}
       />

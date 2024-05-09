@@ -1,3 +1,4 @@
+import * as React from "react";
 import Svg, {
   SvgProps,
   Path,
@@ -6,18 +7,16 @@ import Svg, {
   Use,
   Image,
 } from "react-native-svg";
-
 const DriverMarker = (props: SvgProps) => (
   <Svg
-    // @ts-ignore
     xmlns="http://www.w3.org/2000/svg"
     xmlnsXlink="http://www.w3.org/1999/xlink"
-    width={76}
-    height={110}
+    width={35}
+    height={50}
     fill="none"
     {...props}
   >
-    <Path fill="url(#a)" d="M0 0h75.89v110H0z" />
+    <Path fill="url(#a)" d="M0 0h34.496v50H0z" />
     <Defs>
       <Pattern
         id="a"
@@ -36,5 +35,4 @@ const DriverMarker = (props: SvgProps) => (
     </Defs>
   </Svg>
 );
-
 export default DriverMarker;

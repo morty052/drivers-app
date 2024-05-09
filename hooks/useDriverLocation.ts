@@ -34,7 +34,7 @@ export const useDriverLocation = () => {
   React.useEffect(() => {
     // TODO REMOVE THIS CODE
     const token = getItem("expo_push_token");
-    if (token == "ExponentPushToken[jr5IjoIZ7abdkJDLnFUtrY]") {
+    if (token == "ExponentPushToken[X1RWm1G7hOC6in0pzQ8bGr]") {
       setLocation({ longitude: -78.7109587, latitude: 43.9522573 });
 
       // * SAVE LATITUDE AND LONGITUDE TO SECURE STORE

@@ -11,12 +11,17 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dietdining.driversapp",
       "config": {
         "googleMapsApiKey": "AIzaSyBShNH_HLsiXU6yinLqBqOJr-GueyVH3ss"
+      },
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your Camera."
       }
     },
     "android": {
@@ -30,7 +35,11 @@
         "googleMaps": {
           "apiKey": "AIzaSyBdE4cgtG-GaHplPTFGDHt1iuegK2rfr7E"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

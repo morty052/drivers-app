@@ -1,29 +1,46 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Colors from "../../constants/colors";
 import { SEMI_BOLD } from "../../constants/fontNames";
 import { baseUrl } from "../../constants/baseUrl";
-import { setItem } from "../../utils/storage";
+import { getItem, setItem } from "../../utils/storage";
 
 export const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState<string | unknown>();
+  const [error, setError] = React.useState<string>();
+  const [loading, setLoading] = React.useState(false);
 
-  async function handleLogin() {
+  const handleLogin = React.useCallback(async () => {
     try {
       if (!email || !password) {
         throw "Please enter both fields to continue";
       }
+
+      setLoading(true);
+      const expo_push_token = getItem("expo_push_token");
       const res = await fetch(
-        `${baseUrl}/drivers/login?email=${email}&password=${password}`
+        `${baseUrl}/drivers/login?email=${email}&password=${password}&expo_push_token=${expo_push_token}`
       );
       const data = await res.json();
       const { status, driver } = data;
 
-      const { firstname, lastname, vehicle, avatar, _id, phone } = driver;
-      console.log(data);
+      if (status.error) {
+        console.error(status);
+        setLoading(false);
+        throw "Invalid email or password";
+      }
+
+      const { firstname, lastname, vehicle, avatar, _id, phone, verified } =
+        driver;
 
       const driverDetails = {
         _id,
@@ -35,10 +52,6 @@ export const LoginScreen = ({ navigation }: any) => {
         vehicle,
       };
 
-      if (status.error) {
-        console.error(status);
-        throw "Something went wrong please check email and password";
-      }
       setItem("_id", `${_id}`);
       setItem("email", `${email}`);
       setItem("firstname", `${firstname}`);
@@ -48,12 +61,16 @@ export const LoginScreen = ({ navigation }: any) => {
       setItem("vehicle", `${vehicle}`);
       setItem("DRIVER_DETAILS", JSON.stringify(driverDetails));
       setItem("ONBOARDED", "TRUE");
+      if (verified) {
+        setItem("VERIFIED", "TRUE");
+      }
       navigation.navigate("HomeStack");
     } catch (error) {
-      setError(error);
+      setError(error as string);
+      setLoading(false);
       console.error(error);
     }
-  }
+  }, [email, password, navigation]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "ghostwhite" }}>
@@ -81,12 +98,18 @@ export const LoginScreen = ({ navigation }: any) => {
             value={password}
             onChangeText={(text) => setPassword(text)}
           />
+          {error && (
+            <Text style={{ color: "red", textAlign: "center", fontSize: 12 }}>
+              {error}
+            </Text>
+          )}
           <Text onPress={() => navigation.navigate("HomeStack")}>
             Forgot Password?
           </Text>
         </View>
         <Pressable onPress={handleLogin} style={styles.button}>
-          <Text style={styles.buttonText}>Login</Text>
+          {!loading && <Text style={styles.buttonText}>Login</Text>}
+          {loading && <ActivityIndicator size={40} color={"white"} />}
         </Pressable>
         <Text
           onPress={() => navigation.navigate("Register")}

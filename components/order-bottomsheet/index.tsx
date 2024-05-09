@@ -181,13 +181,15 @@ function ActiveSheetView({
 }
 
 export const OrderBottomSheet = ({ order, accepted, handleAccept }: Props) => {
+  const ref = React.useRef<BottomSheet>(null);
   const snapPoints = React.useMemo(
-    () => (accepted ? ["10%", "30%"] : ["30%"]),
+    () => (accepted ? ["20%", "40%"] : ["30%"]),
     [accepted]
   );
 
   return (
     <BottomSheet
+      ref={ref}
       style={{ borderRadius: 0, zIndex: 4 }}
       handleIndicatorStyle={{ backgroundColor: "white" }}
       backgroundStyle={{

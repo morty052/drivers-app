@@ -21,6 +21,8 @@ import { MenuButton } from "../../components/menu-button";
 import driver_marker from "../../assets/location_marker.png";
 import store_marker from "../../assets/store_marker.png";
 import InteractionButtons from "./components/InteractionButtons";
+import DriverMarker from "../../components/map/markers/DriverMarker";
+import StoreMarker from "../../components/map/markers/StoreMarker";
 
 type Props = {};
 
@@ -48,12 +50,12 @@ type NewdeliveryProps = {
 
 const NewDeliveryPopup = ({
   newDelivery,
-  setNewDelivery,
   acceptOrder,
+  rejectOrder,
 }: {
   newDelivery: NewdeliveryProps | null;
-  setNewDelivery: React.Dispatch<React.SetStateAction<NewdeliveryProps | null>>;
   acceptOrder: () => void;
+  rejectOrder: () => void;
 }) => {
   const { total, vendor } = newDelivery ?? {};
   const address = React.useMemo(() => {
@@ -88,7 +90,7 @@ const NewDeliveryPopup = ({
         }}
       >
         <Ionicons
-          onPress={() => setNewDelivery(null)}
+          onPress={rejectOrder}
           color={Colors.danger}
           name="close-circle-outline"
           size={30}
@@ -243,13 +245,23 @@ export const Home = ({ navigation }: any) => {
   }
 
   function rejectOrder() {
-    console.info("accepted");
+    console.info("rejected");
+    setnewDelivery(null);
+    setnewDeliveryLocation(undefined);
   }
 
   async function handleOnline() {
     try {
-      const _id = getItem("_id");
-      const res = await fetch(`${baseUrl}/drivers/go-online?_id=${_id}`);
+      const driver_id = getItem("_id");
+      const lat = getItem("latitude");
+      const lng = getItem("longitude");
+      const res = await fetch(`${baseUrl}/drivers/go-online`, {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify({ driver_id, lat, lng }),
+      });
       const data = await res.json();
       const orders = await fetchNearbyOrders();
       setOrders(orders);
@@ -274,7 +286,7 @@ export const Home = ({ navigation }: any) => {
         latitude: Number(vendor_location.lat),
         longitude: Number(vendor_location.lng),
       });
-      animateToStore();
+      // animateToStore();
       await playSound();
     });
   }, [socket]);
@@ -315,14 +327,15 @@ export const Home = ({ navigation }: any) => {
             newDelivery && { height: "100%" },
           ]}
         >
-          <Marker tracksViewChanges={false} coordinate={origin as LatLng}>
-            <View style={{ height: 50, width: 50 }}>
+          <Marker coordinate={origin as LatLng}>
+            {/* <View style={{ height: 50, width: 50 }}>
               <Image
                 resizeMode="contain"
                 style={{ height: 50, width: 50, alignSelf: "center" }}
                 source={driver_marker}
               />
-            </View>
+            </View> */}
+            <DriverMarker />
           </Marker>
           {newDeliveryLocation && (
             <Marker
@@ -331,11 +344,12 @@ export const Home = ({ navigation }: any) => {
               coordinate={newDeliveryLocation as LatLng}
             >
               <View style={{ height: 70, width: 70 }}>
-                <Image
+                {/* <Image
                   resizeMode="contain"
                   style={{ height: 70, width: 70, alignSelf: "center" }}
                   source={store_marker}
-                />
+                /> */}
+                <StoreMarker />
               </View>
             </Marker>
           )}
@@ -346,6 +360,7 @@ export const Home = ({ navigation }: any) => {
               apikey={GOOGLE_MAPS_DIRECTIONS_APIKEY}
               strokeWidth={8}
               strokeColor={Colors.primary}
+              onReady={() => animateToStore()}
             />
           )}
         </MapView>
@@ -362,7 +377,7 @@ export const Home = ({ navigation }: any) => {
         />
         <NewDeliveryPopup
           acceptOrder={acceptOrder}
-          setNewDelivery={setnewDelivery}
+          rejectOrder={rejectOrder}
           newDelivery={newDelivery}
         />
       </View>

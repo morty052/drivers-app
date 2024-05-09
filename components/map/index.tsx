@@ -6,6 +6,9 @@ import Colors from "../../constants/colors";
 import driver_marker from "../../assets/location_marker.png";
 import store_marker from "../../assets/store_marker.png";
 import user_marker from "../../assets/user_marker.png";
+import DriverMarker from "./markers/DriverMarker";
+import UserMarker from "./markers/UserMarker";
+import StoreMarker from "./markers/StoreMarker";
 // import DriverMarker from "./markers/DriverMarker";
 
 type Props = {
@@ -22,10 +25,12 @@ const Map = React.forwardRef<MapView, Props>(function Map(
   { origin, pickupLocation, height, delivery_location, delivering },
   ref
 ) {
+  const mapRef = React.useRef<MapView>(null);
+
   const animateToStore = () => {
-    if (ref.current) {
-      ref.current.fitToElements({
-        edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
+    if (mapRef.current) {
+      mapRef.current.fitToElements({
+        edgePadding: { top: 100, right: 50, bottom: 50, left: 100 },
         animated: true,
       });
     }
@@ -33,7 +38,7 @@ const Map = React.forwardRef<MapView, Props>(function Map(
 
   return (
     <MapView
-      ref={ref}
+      ref={mapRef}
       showsBuildings
       // customMapStyle={online ? MapStyle : undefined}
       showsCompass={false}
@@ -47,27 +52,28 @@ const Map = React.forwardRef<MapView, Props>(function Map(
     >
       <Marker coordinate={origin as LatLng}>
         <View style={{ height: 50, width: 50 }}>
-          <Image
+          {/* <Image
             resizeMode="contain"
             style={{ height: 50, width: 50, alignSelf: "center" }}
             source={driver_marker}
-          />
-          {/* <DriverMarker /> */}
+          /> */}
+          <DriverMarker />
         </View>
       </Marker>
 
-      {pickupLocation && (
+      {pickupLocation && !delivering && (
         <Marker
           pinColor="#474744"
           title={pickupLocation?.name}
           coordinate={pickupLocation.coords as LatLng}
         >
-          <View style={{ height: 70, width: 70 }}>
-            <Image
+          <View style={{ height: 50, width: 50 }}>
+            {/* <Image
               resizeMode="contain"
               style={{ height: 70, width: 70, alignSelf: "center" }}
               source={store_marker}
-            />
+            /> */}
+            <StoreMarker style={{ height: 50, width: 50 }} />
           </View>
         </Marker>
       )}
@@ -76,12 +82,13 @@ const Map = React.forwardRef<MapView, Props>(function Map(
           title={delivery_location.address}
           coordinate={delivery_location.coords as LatLng}
         >
-          <View style={{ height: 70, width: 70 }}>
-            <Image
+          <View style={{ height: 50, width: 50 }}>
+            {/* <Image
               resizeMode="contain"
               style={{ height: 70, width: 70, alignSelf: "center" }}
               source={user_marker}
-            />
+            /> */}
+            <UserMarker />
           </View>
         </Marker>
       )}
